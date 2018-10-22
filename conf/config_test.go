@@ -2,7 +2,7 @@ package conf_test
 
 import (
 	"testing"
-	"codehome/match/conf"
+	"github.com/BideWong/iStock/conf"
 )
 
 func TestfnInit(t *testing.T) {

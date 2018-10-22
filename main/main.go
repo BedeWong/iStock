@@ -1,8 +1,8 @@
 package main
 
 import (
-	_ "github.com/BideWong/iStockExchange/conf"
-	_ "github.com/BideWong/iStockExchange/match_rpc"
+	_ "github.com/BideWong/iStock/conf"
+	_ "github.com/BideWong/iStock/match_rpc"
 	"fmt"
 )
 

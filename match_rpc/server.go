@@ -7,7 +7,7 @@ import (
 	"net/rpc/jsonrpc"
 	"github.com/gpmgo/gopm/modules/log"
 	"os"
-	"github.com/BideWong/iStockExchange/conf"
+	"github.com/BideWong/iStock/conf"
 )
 
 func rpc_server_start(addr string) error{
