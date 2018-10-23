@@ -13,8 +13,17 @@ type ConfigRpc struct {
 	// ...
 }
 
+type ConfigRedis struct {
+	Host string
+	DB	int
+	MaxIdle int
+	MaxActive int
+	Auth string
+}
+
 type Config struct {
 	Rpc ConfigRpc			// node rpc
+	Rds ConfigRedis
 }
 
 var Data Config
@@ -40,7 +49,8 @@ func GetConfig() Config {
 	return Data
 }
 
-func Init() {
-	LoadConfig("./config.json", Data)
+func init() {
+	LoadConfig("H:/mygo/src/github.com/BideWong/iStock/conf/config.json", &Data)
+	//LoadConfig("./config.json", &Data)
 }
 
