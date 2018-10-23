@@ -6,7 +6,7 @@ import (
 )
 
 func TestfnInit(t *testing.T) {
-	conf.Init()
+	//conf.init()
 
 	if conf.GetConfig() != conf.GetConfig() {
 		t.Logf("两次获取的对象不唯一:\n")

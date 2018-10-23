@@ -17,7 +17,8 @@ var (
 
 func init() {
 	var err error
-	DBSession, err = gorm.Open("mysql", "wong:wong@(120.79.208.53:3306)/istock?charset=utf8")
+	DBSession, err = gorm.Open("mysql", conf.Data.Mysql.Host + "/" +
+		conf.Data.Mysql.Database + "?charset=utf8")
 	if err != nil {
 		log.Error("gorm init err:", err)
 		os.Exit(-1)

@@ -21,9 +21,15 @@ type ConfigRedis struct {
 	Auth string
 }
 
+type ConfigMysql struct {
+	Host string
+	Database string
+}
+
 type Config struct {
 	Rpc ConfigRpc			// node rpc
 	Rds ConfigRedis
+	Mysql ConfigMysql
 }
 
 var Data Config
