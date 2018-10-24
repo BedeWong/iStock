@@ -10,19 +10,11 @@ import (
 type Tb_user struct {
 	gorm.Model
 	User_id 		int 		`gorm:"not null; unique_index"`
+	// 用户的可用资金
 	User_money		float64     `gorm:"type:decimal(12,3)"`
+	//  用户的总资产：包括当前的市值
 	User_all_capital	float64 `gorm:"type:decimal(12,3)"`
 }
-
-
-type User struct {
-
-}
-
-func (this *User) AddUser(uid int, money float64, capital float64) error {
-	return nil
-}
-
 
 func init() {
 	if db.DBSession.HasTable(&Tb_user{}) == false {
@@ -30,6 +22,6 @@ func init() {
 		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Tb_user{})
 		//fmt.Println("创建表：Tb_user ok")
 	}else {
-		//fmt.Println("表：Tb_user ok已存在。")
+		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Tb_user{})
 	}
 }

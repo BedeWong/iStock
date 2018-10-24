@@ -1,18 +1,24 @@
 package conf
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"github.com/gpmgo/gopm/modules/log"
 	"os"
+	"encoding/json"
 )
 
+/***
+	rpc 配置
+ */
 type ConfigRpc struct {
 	Addr string      		// listen at
 	Pattern string   		// http handler pattern
 	// ...
 }
 
+/****
+	reids配置
+ */
 type ConfigRedis struct {
 	Host string
 	DB	int
@@ -21,15 +27,30 @@ type ConfigRedis struct {
 	Auth string
 }
 
+/****
+	数据库配置
+ */
+
 type ConfigMysql struct {
 	Host string
 	Database string
+}
+
+/***
+	交易规则相关配置
+*/
+type ConfigTrade struct{
+	TransferFeeSZ		float64
+	TransferFeeSH		float64
+	StampTax		float64
+	Brokerage		float64
 }
 
 type Config struct {
 	Rpc ConfigRpc			// node rpc
 	Rds ConfigRedis
 	Mysql ConfigMysql
+	Trade ConfigTrade
 }
 
 var Data Config

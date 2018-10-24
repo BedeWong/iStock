@@ -15,11 +15,15 @@ type Tb_trade_detail struct {
 	Stock_code  string  	`grom:"type:varchar(16); not null"`
 	Stock_price float64 	`gorm:"type:decimal(12,2); not null"`
 	Stock_count int			`grom:"default:0;"`
+
+	Stamp_tax	float64		`gorm:"type:decimal(12,2);default:0.0"`	 // 印花税
 }
 
 func init() {
 	if db.DBSession.HasTable(&Tb_trade_detail{}) == false {
 		// will append "ENGINE=InnoDB" to the SQL statement when creating table `users`
 		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Tb_trade_detail{})
+	}else {
+		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Tb_trade_detail{})
 	}
 }

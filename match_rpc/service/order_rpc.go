@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"github.com/BideWong/iStock/service/account"
+	"github.com/gpmgo/gopm/modules/log"
 )
 
 // rpc service
@@ -13,8 +15,9 @@ type AddOrderRequest struct {
 	Sign		string	`json:"sign"`					// 代替用户的token, userid+reqtime 的hash值
 	Stock_code	string	`json:"stock_code"`
 	Stock_name	string	`json:"stock_name"`
-	Stock_count	string	`json:"stock_count"`
-	Stock_price	string	`json:"stock_price"`
+	Stock_count	int		`json:"stock_count"`
+	Stock_price	float64	`json:"stock_price"`
+	Trade_type	int		`json:"trade_type"`
 	Req_time	string  `json:"req_time"`
 }
 
@@ -28,14 +31,94 @@ type AddOrderResponse struct {
 func (this *Order)AddOrder(req AddOrderRequest, resp *AddOrderResponse) error {
 	fmt.Println("req:", req)
 
+	defer func(){
+		err := recover()
+			if err == nil {
+				resp.Ret_code = -1
+				resp.Err_msg = fmt.Sprintf("AddOrder err:%v", err)
+			}
+	}()
+
+	acc := account.Handler{}
+	ok, err := acc.CheckIdentity(fmt.Sprintf("%d", req.User_id), req.Req_time, req.Sign)
+	if err != nil {
+		resp.Ret_code = -1
+		resp.Err_msg = fmt.Sprintf("AddOrder err:%v", err)
+		return err
+	}
+
+	if ok != true {
+		resp.Ret_code = -1
+		resp.Err_msg = fmt.Sprintf("身份验证错误。")
+		return nil
+	}
+
+	amount, stamp_tax, transfer_tax, brokerage, err := acc.CalcTax(req.User_id, req.Trade_type, req.Stock_code, req.Stock_name, req.Stock_price, req.Stock_count)
+	if err != nil {
+		resp.Ret_code = -1
+		resp.Err_msg = fmt.Sprintf("服务器错误。")
+		return nil
+	}
+	log.Info("amount:%f, stamp_tax:%f, transfer_tax:%f, brokerage:%f", amount, stamp_tax, transfer_tax, brokerage)
+
+	// 扣算 金额， 税费
+	err = acc.CheckAccountMoney(req.User_id, amount, stamp_tax, transfer_tax, brokerage)
+	if err != nil {
+		resp.Ret_code = -1
+		resp.Err_msg = err.Error()
+		return nil
+	}
+
+
 
 
 	return nil
 }
 
 
-func (this *Order)RevokeOrder(req string, resp *string) error {
+// 委托下单的 请求体
+type RevokeOrderRequest struct {
+	User_id		int		`json:"user_id"`
+	Sign		string	`json:"sign"`					// 代替用户的token, userid+reqtime 的hash值
+	Order_id	uint	`json:"order_id"`
+	Stock_code	string	`json:"stock_code"`
+	Stock_name	string	`json:"stock_name"`
+	Trade_type	int		`json:"trade_type"`
+	Req_time	string  `json:"req_time"`
+}
+
+// 委托下单的响应
+type RevokeOrderResponse struct {
+	Err_msg 	string		`json:"err_msg"`
+	Ret_code	int			`json:"ret_code"`
+}
+
+func (this *Order)RevokeOrder(req RevokeOrderRequest, resp *RevokeOrderResponse) error {
 	fmt.Println("req:", req)
+
+	defer func(){
+		err := recover()
+		if err == nil {
+			resp.Ret_code = -1
+			resp.Err_msg = fmt.Sprintf("RevokeOrder err:%v", err)
+		}
+	}()
+
+	// 验证身份这段代码可以提取出来， 作个钩子函数（中间件）
+	acc := account.Handler{}
+	ok, err := acc.CheckIdentity(fmt.Sprintf("%d", req.User_id), req.Req_time, req.Sign)
+	if err != nil {
+		resp.Ret_code = -1
+		resp.Err_msg = fmt.Sprintf("RevokeOrder err:%v", err)
+		return nil
+	}
+	if ok != true {
+		resp.Ret_code = -1
+		resp.Err_msg = fmt.Sprintf("身份验证错误。")
+		return nil
+	}
+
+
 	return nil
 }
 
