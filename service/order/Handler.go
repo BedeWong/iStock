@@ -22,7 +22,7 @@ import (
 	Tb_order_real 存储的记录会在每次的部分成交中修改其 数量，这个记录也是定序系统（sequence）中排序依据，存储依据。
  */
 func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_price float64, stock_count int,
-	amount, stamp_tax, transfer_tax, brokerage float64) error {
+	amount, stamp_tax, transfer_tax, brokerage float64) (model.Tb_order_real, error) {
 
 	order := model.Tb_order{
 		User_id : userid,
@@ -66,5 +66,5 @@ func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_p
 
 	db.DBSession.Save(&order_real)
 
-	return nil
+	return order_real, nil
 }
