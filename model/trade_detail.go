@@ -15,6 +15,7 @@ type Tb_trade_detail struct {
 	Stock_code  string  	`grom:"type:varchar(16); not null"`
 	Stock_price float64 	`gorm:"type:decimal(12,2); not null"`
 	Stock_count int			`grom:"default:0;"`
+	Trade_type  int			`gorm:"default:0;"`
 
 	Stamp_tax	float64		`gorm:"type:decimal(12,2);default:0.0"`	 // 印花税
 }

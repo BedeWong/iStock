@@ -11,11 +11,14 @@ type Tb_user_stock struct {
 	gorm.Model
 	User_id 		int 		`gorm:"not null"`
 	Stock_name 		string 		`grom:"type:varchar(16); not null"`
+	Stock_code		string  	`grom:"type:varchar(16); not null"`
+	// 持有？股
 	Stock_count		int			`grom:"default:0;"`
+	// 持倉價
 	Stock_price 	float64 	`gorm:"type:decimal(12,2); not null"`
 
 	// T+1 本股可卖部分， 当前交易日卖的股票本交易日不能出售
-	stock_count_can_sale int	`grom:"default 0"`
+	Stock_count_can_sale int	`grom:"default 0"`
 }
 
 func init() {
