@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"github.com/BideWong/iStock/service/account"
 	"github.com/gpmgo/gopm/modules/log"
+	"github.com/BideWong/iStock/service/order"
+	manager "github.com/BideWong/iStock/service"
+	"github.com/BideWong/iStock/service/message"
 )
 
 // rpc service
@@ -69,8 +72,16 @@ func (this *Order)AddOrder(req AddOrderRequest, resp *AddOrderResponse) error {
 		return nil
 	}
 
+	// 生成订单
+	order_detail, err := order.NewOrder(req.User_id, req.Trade_type, req.Stock_code, req.Stock_name, req.Stock_price, req.Stock_count, amount, stamp_tax, transfer_tax, brokerage)
+	if err != nil {
+		resp.Ret_code = -1
+		resp.Err_msg = err.Error()
+		return nil
+	}
 
-
+	// 将订单发送到 定序系统
+	manager.Send2Senquence(order_detail, 2)
 
 	return nil
 }
@@ -118,6 +129,14 @@ func (this *Order)RevokeOrder(req RevokeOrderRequest, resp *RevokeOrderResponse)
 		return nil
 	}
 
+	msg := message.MsgRevokeOrder{
+		Order_id:req.Order_id,
+		User_id:req.User_id,
+		Req_time : req.Req_time,
+	}
+
+	// 撤销订单 发送 到定序系统 从队列中删除委托订单
+	manager.Send2Senquence(msg, 2)
 
 	return nil
 }
