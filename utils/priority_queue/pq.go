@@ -17,6 +17,12 @@ type Item struct {
 	// The index is needed by update and is maintained by the heap.Interface methods.
 	index int // The index of the item in the heap.
 }
+
+// 獲取 value 字段
+func (it Item)Value()interface{} {
+	return it.value
+}
+
 // A PriorityQueue implements heap.Interface and holds Items.
 type PriorityQueue []*Item
 
