@@ -79,5 +79,7 @@ func GetConfig() Config {
 func init() {
 	LoadConfig("H:/mygo/src/github.com/BideWong/iStock/conf/config.json", &Data)
 	//LoadConfig("./config.json", &Data)
+
+	log.Info("config module init ok.")
 }
 

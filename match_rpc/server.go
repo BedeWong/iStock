@@ -1,16 +1,15 @@
 package match_rpc
 
 import (
+	"os"
 	"net/http"
 	"io"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"github.com/gpmgo/gopm/modules/log"
-	"os"
-	"github.com/BideWong/iStock/conf"
 
+	"github.com/gpmgo/gopm/modules/log"
+	"github.com/BideWong/iStock/conf"
 	"github.com/BideWong/iStock/match_rpc/service"
-	"fmt"
 )
 
 func register_service() {
@@ -18,7 +17,7 @@ func register_service() {
 
 	rpc.RegisterName("order", order)
 
-	fmt.Println("register service ok.")
+	log.Info("register service ok.")
 }
 
 func rpc_server_start(addr string) error{
@@ -48,4 +47,6 @@ func init(){
 			os.Exit(-1)
 		}
 	}()
+
+	log.Info("rpc server started ok.")
 }
