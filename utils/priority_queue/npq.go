@@ -1,6 +1,11 @@
 package priority_queue
 
-import "container/heap"
+import (
+	"container/heap"
+	"fmt"
+	"errors"
+	"github.com/gpmgo/gopm/modules/log"
+)
 
 // 根据 官方文档改编的 优先队列：卖盘队列
 // An Item is something we manage in a priority queue.
@@ -40,10 +45,32 @@ func (pq *NPriorityQueue) Pop() interface{} {
 	return item
 }
 // update modifies the priority and value of an Item in the queue.
-func (pq *NPriorityQueue) Update(item *Item, value interface{}, priority int64) {
+func (pq *NPriorityQueue) Update(item *Item, value interface{}, price float64, time_stamp int64) {
 	item.value = value
-	item.time_stamp = priority
+	item.price = price
+	item.time_stamp = time_stamp
 	heap.Fix(pq, item.index)
+}
+
+// 删除一个元素，
+func (pq *NPriorityQueue) Remove(cmp func(val interface{})bool) error{
+	for _, it := range *pq {
+		if cmp(it.value) {
+			pq.Update(it, it.value, price_max, time_stamp_max)  // 修改 优先级到 top1
+
+			el := pq.Pop()
+			item, _ := el.(*Item)
+
+			if item.time_stamp != time_stamp_min || item.price != price_min {
+				log.Error("元素不在pop()中。")
+				return errors.New(fmt.Sprintf("Remove:执行失败。"))
+			}
+			// 结束函数
+			return nil
+		}
+	}
+
+	return errors.New("item not found.")
 }
 
 // create priority Queue

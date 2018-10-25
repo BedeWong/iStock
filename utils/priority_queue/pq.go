@@ -1,6 +1,12 @@
 package priority_queue
 
-import "container/heap"
+import (
+	"container/heap"
+	"math"
+	"github.com/gpmgo/gopm/modules/log"
+	"github.com/pkg/errors"
+	"fmt"
+)
 
 // 根据 官方文档改编的 优先队列：买盘队列
 // An Item is something we manage in a priority queue.
@@ -15,6 +21,14 @@ type Item struct {
 type PriorityQueue []*Item
 
 func (pq PriorityQueue) Len() int { return len(pq) }
+
+const (
+	price_min = 0.0
+	price_max = math.MaxFloat64
+
+	time_stamp_min = 0
+	time_stamp_max = math.MaxInt64
+)
 
 func (pq PriorityQueue) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
@@ -40,10 +54,32 @@ func (pq *PriorityQueue) Pop() interface{} {
 	return item
 }
 // update modifies the priority and value of an Item in the queue.
-func (pq *PriorityQueue) Update(item *Item, value interface{}, priority int64) {
+func (pq *PriorityQueue) Update(item *Item, value interface{}, price float64, priority int64) {
 	item.value = value
+	item.price = price
 	item.time_stamp = priority
 	heap.Fix(pq, item.index)
+}
+
+// 删除一个元素，
+func (pq *PriorityQueue) Remove(cmp func(val interface{})bool) error{
+	for _, it := range *pq {
+		if cmp(it.value) {
+			pq.Update(it, it.value, price_min, time_stamp_min)  // 修改 优先级到 top1
+
+			el := pq.Pop()
+			item, _ := el.(*Item)
+
+			if item.time_stamp != time_stamp_min || item.price != price_min {
+				log.Error("元素不在pop()中。")
+				return errors.New(fmt.Sprintf("Remove:执行失败。"))
+			}
+			// 结束函数
+			return nil
+		}
+	}
+
+	return errors.New("item not found.")
 }
 
 // new queue Node
