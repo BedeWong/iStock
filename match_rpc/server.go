@@ -8,8 +8,8 @@ import (
 	"net/rpc/jsonrpc"
 
 	"github.com/gpmgo/gopm/modules/log"
-	"github.com/BideWong/iStock/conf"
-	"github.com/BideWong/iStock/match_rpc/service"
+	"github.com/BedeWong/iStock/conf"
+	"github.com/BedeWong/iStock/match_rpc/service"
 )
 
 func register_service() {

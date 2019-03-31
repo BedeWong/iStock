@@ -2,8 +2,8 @@ package data_source
 
 import (
 	"context"
-	"github.com/BideWong/iStock/service/data_source/source"
-	"github.com/BideWong/iStock/service/message"
+	"github.com/BedeWong/iStock/service/data_source/source"
+	"github.com/BedeWong/iStock/service/message"
 )
 
 // 逐筆成交記錄

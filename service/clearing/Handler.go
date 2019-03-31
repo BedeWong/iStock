@@ -2,12 +2,12 @@ package clearing
 
 import (
 	"github.com/gpmgo/gopm/modules/log"
-	"github.com/BideWong/iStock/model"
-	"github.com/BideWong/iStock/db"
-	"github.com/BideWong/iStock/utils"
-	"github.com/BideWong/iStock/conf"
+	"github.com/BedeWong/iStock/model"
+	"github.com/BedeWong/iStock/db"
+	"github.com/BedeWong/iStock/utils"
+	"github.com/BedeWong/iStock/conf"
 
-	manager "github.com/BideWong/iStock/service"
+	manager "github.com/BedeWong/iStock/service"
 )
 
 // 清算系統

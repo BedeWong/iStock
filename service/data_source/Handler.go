@@ -2,8 +2,8 @@ package data_source
 
 import (
 	"github.com/gpmgo/gopm/modules/log"
-	"github.com/BideWong/iStock/service/message"
-	manager "github.com/BideWong/iStock/service"
+	"github.com/BedeWong/iStock/service/message"
+	manager "github.com/BedeWong/iStock/service"
 )
 
 // 與外界通信的 channel

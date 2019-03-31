@@ -2,11 +2,11 @@ package service
 
 import (
 	"fmt"
-	"github.com/BideWong/iStock/service/account"
+	"github.com/BedeWong/iStock/service/account"
 	"github.com/gpmgo/gopm/modules/log"
-	"github.com/BideWong/iStock/service/order"
-	manager "github.com/BideWong/iStock/service"
-	"github.com/BideWong/iStock/service/message"
+	"github.com/BedeWong/iStock/service/order"
+	manager "github.com/BedeWong/iStock/service"
+	"github.com/BedeWong/iStock/service/message"
 )
 
 // rpc service

@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/BideWong/iStock/db"
+	"github.com/BedeWong/iStock/db"
 )
 
 // 用户账户表， 不存其他的业务数据， 关联 业务用户userid

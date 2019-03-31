@@ -1,8 +1,8 @@
 package order
 
 import (
-	"github.com/BideWong/iStock/model"
-	"github.com/BideWong/iStock/db"
+	"github.com/BedeWong/iStock/model"
+	"github.com/BedeWong/iStock/db"
 )
 
 /***

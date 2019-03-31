@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 	"github.com/gpmgo/gopm/modules/log"
-	"github.com/BideWong/iStock/service/message"
+	"github.com/BedeWong/iStock/service/message"
 )
 
 type BaseSourceWorker struct {

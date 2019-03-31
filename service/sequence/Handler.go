@@ -1,16 +1,16 @@
 package sequence
 
 import (
-	"github.com/BideWong/iStock/model"
-	pq "github.com/BideWong/iStock/utils/priority_queue"
+	"github.com/BedeWong/iStock/model"
+	pq "github.com/BedeWong/iStock/utils/priority_queue"
 	"github.com/gpmgo/gopm/modules/log"
 	"sync"
 	"github.com/pkg/errors"
 	"encoding/json"
 	"fmt"
-	"github.com/BideWong/iStock/db"
-	"github.com/BideWong/iStock/service/message"
-	manager "github.com/BideWong/iStock/service"
+	"github.com/BedeWong/iStock/db"
+	"github.com/BedeWong/iStock/service/message"
+	manager "github.com/BedeWong/iStock/service"
 )
 
 // 为每支股票维护两个队列，

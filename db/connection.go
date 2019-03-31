@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 	"github.com/garyburd/redigo/redis"
-	"github.com/BideWong/iStock/conf"
+	"github.com/BedeWong/iStock/conf"
 )
 
 var (

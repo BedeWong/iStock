@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/BideWong/iStock/db"
+	"github.com/BedeWong/iStock/db"
 )
 
 // 成交历史：在这里记录每笔成交的记录。

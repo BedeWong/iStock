@@ -1,17 +1,17 @@
 package main
 
 import (
-	_ "github.com/BideWong/iStock/conf"
-	_ "github.com/BideWong/iStock/match_rpc"
-	"github.com/BideWong/iStock/db"
+	_ "github.com/BedeWong/iStock/conf"
+	_ "github.com/BedeWong/iStock/match_rpc"
+	"github.com/BedeWong/iStock/db"
 
-	_ "github.com/BideWong/iStock/model"
+	_ "github.com/BedeWong/iStock/model"
 
 	// 各个子模块
-	"github.com/BideWong/iStock/service/data_source"
-	"github.com/BideWong/iStock/service/match"
-	"github.com/BideWong/iStock/service/sequence"
-	"github.com/BideWong/iStock/service/clearing"
+	"github.com/BedeWong/iStock/service/data_source"
+	"github.com/BedeWong/iStock/service/match"
+	"github.com/BedeWong/iStock/service/sequence"
+	"github.com/BedeWong/iStock/service/clearing"
 	"github.com/gpmgo/gopm/modules/log"
 )
 

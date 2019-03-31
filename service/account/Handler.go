@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	"strings"
 	"fmt"
-	"github.com/BideWong/iStock/utils"
-	"github.com/BideWong/iStock/conf"
-	"github.com/BideWong/iStock/model"
-	"github.com/BideWong/iStock/db"
+	"github.com/BedeWong/iStock/utils"
+	"github.com/BedeWong/iStock/conf"
+	"github.com/BedeWong/iStock/model"
+	"github.com/BedeWong/iStock/db"
 	"github.com/gpmgo/gopm/modules/log"
 	"errors"
 )
@@ -66,7 +66,7 @@ func (this *Handler)CalcTax(uid int, trade_type int, stock_code, stock_name stri
 }
 
 // 扣算 金額，
-// 印花税： 卖方出， 每笔交易体现  -- 不在这里计算  modified 2018年10月24日22:20:24  by BideWong
+// 印花税： 卖方出， 每笔交易体现  -- 不在这里计算  modified 2018年10月24日22:20:24  by BedeWong
 // 过户费：单次交易计算， 后续不在扣除， 撤单不在退回。
 // 总金额： 卖出0 卖出时，逐笔清算， 买入统一冻结
 func (this *Handler)CheckAccountMoney(userid int, amount, stamp_tax, transfer_tax, brokerage float64) (err error) {
