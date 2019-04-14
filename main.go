@@ -16,10 +16,12 @@ import (
 )
 
 func main(){
-	// 關閉數據庫鏈接
+	// 開啟調試日誌.
+	log.Verbose = true
+	//  關閉數據庫鏈接
 	defer db.CloseDB()
 
-	// 這裏統一初始化 各個模塊
+	//  這裏統一初始化 各個模塊
 	data_source.Init()
 	match.Init()
 	sequence.Init()

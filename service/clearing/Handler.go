@@ -107,6 +107,7 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 		detail.Stamp_tax = trade_vol * conf.Data.Trade.StampTax
 		detail.Stamp_tax = utils.Decimal(detail.Stamp_tax, 2)
 
+		log.Info("sale trade_vol: %f, Stamp_tax: %f", trade_vol, detail.Stamp_tax)
 		// 保存新的紀錄到數據庫
 		db.DBSession.Save(&detail)
 
@@ -157,13 +158,15 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 
 		// 3) 修改持倉價格
 		user_stocks.Stock_price = (user_stocks.Stock_price * (float64)(user_stocks.Stock_count) +
-			detail.Stock_price * (float64)(detail.Stock_count)) / (float64)(user_stocks.Stock_count + detail.Stock_count)
+			detail.Stock_price * (float64)(detail.Stock_count)) /
+			(float64)(user_stocks.Stock_count + detail.Stock_count)
 		// 取兩位小數
 		user_stocks.Stock_price = utils.Decimal(user_stocks.Stock_price, 2)
 
 		// 修改持倉股數
 		user_stocks.Stock_count += detail.Stock_count
 
+		log.Info("OrderDetailHandler user_stocks: %v", user_stocks)
 		// 存入數據庫
 		db.DBSession.Save(&user_stocks)
 	}

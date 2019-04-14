@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 	"errors"
+	"github.com/gpmgo/gopm/modules/log"
 )
 
 type Manager struct {
@@ -52,6 +53,7 @@ func GetInstance() *Manager{
 func Send2Senquence(msg interface{}, tmout int) error{
 	ch := manager.Sequence_que
 
+	log.Debug("Send2Senquence msg: %v", msg)
 	select {
 		case ch <- msg:
 			return nil
@@ -66,6 +68,7 @@ func Send2Senquence(msg interface{}, tmout int) error{
 func Send2Match(msg interface{}, tmout int) error{
 	ch := manager.Match_que
 
+	log.Debug("Send2Match msg: %v", msg)
 	select {
 	case ch <- msg:
 		return nil
@@ -80,6 +83,7 @@ func Send2Match(msg interface{}, tmout int) error{
 func Send2Clearing(msg interface{}, tmout int) error{
 	ch := manager.Clear_que
 
+	log.Debug("Send2Clearing msg: %v", msg)
 	select {
 	case ch <- msg:
 		return nil
@@ -94,6 +98,7 @@ func Send2Clearing(msg interface{}, tmout int) error{
 func Send2Source(msg interface{}, tmout int) error{
 	ch := manager.Source_data_que
 
+	log.Debug("Send2Source msg: %v", msg)
 	select {
 	case ch <- msg:
 		return nil

@@ -86,7 +86,9 @@ func (this *Order)AddOrder(req AddOrderRequest, resp *AddOrderResponse) error {
 
 	// 将订单发送到 定序系统
 	manager.Send2Senquence(order_detail, 2)
-
+	// return ok
+	resp.Ret_code = 0
+	resp.Err_msg = ""
 	return nil
 }
 
@@ -143,7 +145,9 @@ func (this *Order)RevokeOrder(req RevokeOrderRequest, resp *RevokeOrderResponse)
 
 	// 撤销订单 发送 到定序系统 从队列中删除委托订单
 	manager.Send2Senquence(msg, 2)
-
+	// return ok
+	resp.Ret_code = 0
+	resp.Err_msg = ""
 	return nil
 }
 

@@ -64,7 +64,8 @@ func (this *Handler)CalcTax(uid int, trade_type int, stock_code, stock_name stri
 	if trade_type == model.TRADE_TYPE_SALE {
 		amount = 0
 	}
-
+	log.Debug("CalcTax amout: %f, stamp_tax: %f, transfer_tax: %f, brokerage: %f",
+		amount, stamp_tax, transfer_tax, brokerage)
 	return amount, stamp_tax, transfer_tax, brokerage, nil
 }
 
@@ -90,6 +91,6 @@ func (this *Handler)CheckAccountMoney(userid int, amount, stamp_tax, transfer_ta
 	}
 
 	db.DBSession.Save(&user)
-
+	log.Debug("CheckAccountMoney user: %v", user)
 	return nil
 }

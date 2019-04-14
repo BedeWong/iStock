@@ -83,8 +83,11 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 	this.Lock()
 	defer this.Unlock()
 
+	log.Debug("AddOrder starting.")
+
 	id := order.ID
 	if id == 0 {
+		log.Error("訂單ID錯誤:id=0")
 		return errors.New("訂單ID錯誤:id=0")
 	}
 
@@ -99,9 +102,9 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 
 	// 将订单添加到 买卖盘 队列
 	item := pq.NewQueueNode(order, order.UpdatedAt.UnixNano(), order.Stock_price)
-	if order.Trade_type == 0 {
+	if order.Trade_type == model.TRADE_TYPE_BUY {
 		// 委托买单
-
+		log.Debug("委託買單處理：%v", order)
 		que, ok := this.PlateBuy[order.Stock_code];
 		if ok == false {
 			// 当前队列还未建立
@@ -116,7 +119,7 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 		}else {
 			log.Info("添加order[%s]成功. len=%d", string(msg_tmp), len(que))
 		}
-	}else if order.Trade_type == 1 {
+	}else if order.Trade_type == model.TRADE_TYPE_SALE {
 		// 委托卖单
 		que, ok := this.PlateSale[order.Stock_code];
 		if ok == false {
@@ -144,20 +147,23 @@ func (this *Handler)DelOrder(order message.MsgRevokeOrder) error{
 	this.Lock()
 	defer this.Unlock()
 
+	log.Debug("DelOrder 撤單操作.")
+
 	id := order.Order_id
 	if id == 0 {
+		log.Error("訂單ID錯誤:id=0")
 		return errors.New("訂單ID錯誤:id=0")
 	}
 
 	order_real, ok := this.orders[id]
 	if ok == false {
+		log.Error("订单不存在（id=%d）", id)
 		return errors.New(fmt.Sprintf("订单不存在（id=%d）", id))
 	}
 
 
 	// 从 orders 中删除
 	// 从 match 队列中删除
-	// 清算
 	delete(this.orders, id)
 
 	if order_real.Trade_type == model.TRADE_TYPE_SALE {
