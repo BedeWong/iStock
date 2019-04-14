@@ -41,6 +41,7 @@ func HanderTickData(ch <-chan message.MsgTickData) {
 			log.Error("数据源被无情的关闭了,怎么肥四?")
 			break
 		}
+		log.Debug("recv a tick data: data: %v", data)
 
 		err := manager.Send2Match(data, 1)
 		if err != nil {
@@ -63,7 +64,7 @@ func Init() {
 			select {
 				//获取过来的任务通常是一个 命令
 				case task := <-source_que:
-					log.Info("recv a new task: %T, %#v", task, task)
+					log.Info("data soure recv a new stock: %T, %#v", task, task)
 					HandlerCmd(source_handler, task)
 			}
 		}

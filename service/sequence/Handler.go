@@ -117,7 +117,7 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 		if err != nil {
 			log.Error("json.Marshal(order) err:%v", err)
 		}else {
-			log.Info("添加order[%s]成功. len=%d", string(msg_tmp), len(que))
+			log.Info("添加order[%s]成功. len=%d", string(msg_tmp), que.Len())
 		}
 	}else if order.Trade_type == model.TRADE_TYPE_SALE {
 		// 委托卖单
@@ -133,7 +133,7 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 		if err != nil {
 			log.Error("json.Marshal(order) err:%v", err)
 		}else {
-			log.Info("添加order[%s]成功. len=%d", string(msg_tmp), len(que))
+			log.Info("添加order[%s]成功. len=%d", string(msg_tmp), que.Len())
 		}
 	}
 
