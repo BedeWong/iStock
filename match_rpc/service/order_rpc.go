@@ -40,7 +40,7 @@ func (this *Order)AddOrder(req AddOrderRequest, resp *AddOrderResponse) error {
 
 	defer func(){
 		err := recover()
-			if err == nil {
+			if err != nil {
 				resp.Ret_code = -1
 				resp.Err_msg = fmt.Sprintf("AddOrder err:%v", err)
 			}
@@ -117,7 +117,7 @@ func (this *Order)RevokeOrder(req RevokeOrderRequest, resp *RevokeOrderResponse)
 
 	defer func(){
 		err := recover()
-		if err == nil {
+		if err != nil {
 			resp.Ret_code = -1
 			resp.Err_msg = fmt.Sprintf("RevokeOrder err:%v", err)
 		}
