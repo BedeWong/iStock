@@ -73,7 +73,7 @@ func (this *Handler)CalcTax(uid int, trade_type int, stock_code, stock_name stri
 // 过户费：单次交易计算， 后续不在扣除， 撤单不在退回。
 // 总金额： 卖出0 卖出时，逐笔清算， 买入统一冻结
 func (this *Handler)CheckAccountMoney(userid int, amount, stamp_tax, transfer_tax, brokerage float64) (err error) {
-	user := model.Tb_user{}
+	user := model.Tb_user_assets{}
 
 	found := db.DBSession.Where("user_id = ?", userid).First(&user).RecordNotFound()
 	if found == true {

@@ -53,7 +53,7 @@ func OrderHandler(order_real model.Tb_order_real) {
 // 撤单 清算处理
 func RevokeOrderHandler(order_real model.Tb_order_real) {
 
-	user := model.Tb_user{}
+	user := model.Tb_user_assets{}
 
 	err := db.DBSession.Where("user_id=?", order_real.User_id).First(&user).Error
 	if err != nil {
@@ -111,7 +111,7 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 		db.DBSession.Save(&detail)
 
 		/************* 2) 計算用戶資產  */
-		user := model.Tb_user{}
+		user := model.Tb_user_assets{}
 		if err:= db.DBSession.Where("user_id = ?", detail.User_id).First(&user).Error; err != nil {
 			log.Error("user_id=%d 数据记录不存在.", detail.User_id)
 			return
@@ -123,8 +123,8 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 		db.DBSession.Save(&user)
 
 		/************* 3) 修改 用戶的持股 */
-		user_stocks := model.Tb_user_stock{}
-		if err := db.DBSession.Where(&model.Tb_user_stock{
+		user_stocks := model.Tb_user_position{}
+		if err := db.DBSession.Where(&model.Tb_user_position{
 			User_id:detail.User_id,
 			Stock_code:detail.Stock_code,
 		}).First(&user_stocks).Error; err != nil {
@@ -146,8 +146,8 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 		db.DBSession.Save(&detail)
 
 		// 2) 修改 持倉股數 和 持倉價格
-		user_stocks := model.Tb_user_stock{}
-		if err := db.DBSession.Where(&model.Tb_user_stock{
+		user_stocks := model.Tb_user_position{}
+		if err := db.DBSession.Where(&model.Tb_user_position{
 			User_id:detail.User_id,
 			Stock_code:detail.Stock_code,
 		}).First(&user_stocks).Error; err != nil {

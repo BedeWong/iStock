@@ -7,7 +7,7 @@ import (
 
 // 用户账户表， 不存其他的业务数据， 关联 业务用户userid
 // 本表只存储本系统中用到的数据
-type Tb_user struct {
+type Tb_user_assets struct {
 	gorm.Model
 	User_id 		int 		`gorm:"not null; unique_index"`
 	// 用户的可用资金
@@ -17,11 +17,11 @@ type Tb_user struct {
 }
 
 func init() {
-	if db.DBSession.HasTable(&Tb_user{}) == false {
+	if db.DBSession.HasTable(&Tb_user_assets{}) == false {
 		// will append "ENGINE=InnoDB" to the SQL statement when creating table `users`
-		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Tb_user{})
+		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Tb_user_assets{})
 		//fmt.Println("创建表：Tb_user ok")
 	}else {
-		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Tb_user{})
+		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Tb_user_assets{})
 	}
 }

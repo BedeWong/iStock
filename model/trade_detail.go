@@ -5,6 +5,7 @@ import (
 	"github.com/BedeWong/iStock/db"
 )
 
+
 // 成交历史：在这里记录每笔成交的记录。
 //  每个订单可能产生多个 成交记录
 type Tb_trade_detail struct {
@@ -19,6 +20,7 @@ type Tb_trade_detail struct {
 
 	Stamp_tax	float64		`gorm:"type:decimal(12,2);default:0.0"`	 // 印花税
 }
+
 
 func init() {
 	if db.DBSession.HasTable(&Tb_trade_detail{}) == false {
