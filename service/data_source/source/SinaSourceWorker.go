@@ -2,8 +2,8 @@ package source
 
 import (
 	"time"
-	"github.com/gpmgo/gopm/modules/log"
 	"context"
+	"github.com/gpmgo/gopm/modules/log"
 	"github.com/BedeWong/iStock/service/message"
 )
 

@@ -1,4 +1,4 @@
-package main
+package iStock
 
 import (
 	_ "github.com/BedeWong/iStock/conf"
