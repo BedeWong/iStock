@@ -12,6 +12,7 @@ import (
 	"github.com/BedeWong/iStock/match_rpc/service"
 )
 
+// 服务注册.
 func register_service() {
 	order := new(service.Order)
 
@@ -20,8 +21,8 @@ func register_service() {
 	log.Info("register service ok.")
 }
 
-func rpc_server_start(addr string) error{
 
+func rpc_server_start(addr string) error{
 	register_service()
 
 	http.HandleFunc(conf.Data.Rpc.Pattern, func(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +39,7 @@ func rpc_server_start(addr string) error{
 
 	return http.ListenAndServe(addr, nil)
 }
+
 
 func init(){
 	go func() {

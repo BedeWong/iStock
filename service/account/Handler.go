@@ -19,6 +19,9 @@ type Handler struct {
 // 确认身份:
 //  uid+req_time_stamp  的MD5值等於sign的值
 func (this *Handler)CheckIdentity(uid, req_time_stamp, sign string) (bool, error){
+	// (NOTE) hzq: 先关闭请求检查
+	return true, nil
+
 	h := md5.New()
 	h.Write([]byte(uid + req_time_stamp))
 	cipherStr := h.Sum(nil)

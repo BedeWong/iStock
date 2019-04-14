@@ -9,8 +9,10 @@ import (
 	"github.com/BedeWong/iStock/service/message"
 )
 
+
 // rpc service
 type Order struct {}
+
 
 // 委托下单的 请求体
 type AddOrderRequest struct {
@@ -24,11 +26,13 @@ type AddOrderRequest struct {
 	Req_time	string  `json:"req_time"`
 }
 
+
 // 委托下单的响应
 type AddOrderResponse struct {
 	Err_msg 	string		`json:"err_msg"`
 	Ret_code	int			`json:"ret_code"`
 }
+
 
 // 委托下单
 func (this *Order)AddOrder(req AddOrderRequest, resp *AddOrderResponse) error {
@@ -98,11 +102,13 @@ type RevokeOrderRequest struct {
 	Req_time	string  `json:"req_time"`
 }
 
+
 // 委托下单的响应
 type RevokeOrderResponse struct {
 	Err_msg 	string		`json:"err_msg"`
 	Ret_code	int			`json:"ret_code"`
 }
+
 
 func (this *Order)RevokeOrder(req RevokeOrderRequest, resp *RevokeOrderResponse) error {
 	fmt.Println("req:", req)
@@ -140,6 +146,7 @@ func (this *Order)RevokeOrder(req RevokeOrderRequest, resp *RevokeOrderResponse)
 
 	return nil
 }
+
 
 //func (this *Order_service)Test_1(req interface{}, resp *string) error {
 //
