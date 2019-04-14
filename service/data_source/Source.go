@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/BedeWong/iStock/service/data_source/source"
 	"github.com/BedeWong/iStock/model"
+	"github.com/gpmgo/gopm/modules/log"
 )
 
 // 逐筆成交記錄
@@ -34,8 +35,10 @@ func NewSourceHandler() SourceHandler {
 
 // 添加 一支股, 对应的起一个协程，用于获取 实时的逐笔交易数据。
 func (this *SourceHandler)Append(code string) {
+	log.Debug("添加一个股票代码：%s", code)
 	_, ok := this.stocks[code]
 	if ok == false{
+		log.Debug("股票代码: %s 未启动tick 数据获取.", code)
 		ctx, cancel := context.WithCancel(context.Background())
 		work := source.NewBaseSourceWorker(cancel, ctx, code)
 		this.stocks[code] = work

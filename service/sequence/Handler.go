@@ -113,11 +113,11 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 		}
 		que.Push(item)
 
-		msg_tmp, err := json.Marshal(order)
+		order_string, err := json.Marshal(order)
 		if err != nil {
 			log.Error("json.Marshal(order) err:%v", err)
 		}else {
-			log.Info("添加order[%s]成功. len=%d", string(msg_tmp), que.Len())
+			log.Info("添加order[%s]成功. len=%d", string(order_string), que.Len())
 		}
 	}else if order.Trade_type == model.TRADE_TYPE_SALE {
 		// 委托卖单
@@ -129,14 +129,23 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 		}
 		que.Push(item)
 
-		msg_tmp, err := json.Marshal(order)
+		order_string, err := json.Marshal(order)
 		if err != nil {
 			log.Error("json.Marshal(order) err:%v", err)
 		}else {
-			log.Info("添加order[%s]成功. len=%d", string(msg_tmp), que.Len())
+			log.Info("添加order[%s]成功. len=%d", string(order_string), que.Len())
 		}
 	}
 
+	// 通知source有新的股票代码，刷新成交数据
+	source_que := manager.GetInstance().Source_data_que
+	var msg = message.MsgSourceStockDeal{
+		Stock_code: order.Stock_code,
+		Stock_name: order.Stock_name,
+		Type: message.MsgSourceStockDealType_ADD,
+	}
+	msg.Stock_code = order.Stock_code
+	source_que <- msg
 	return nil
 }
 
@@ -414,7 +423,7 @@ func (this *Handler)matchHandlerBuyQue(que pq.PriorityQueue, price float64, coun
 	return nil
 }
 
-// 匹配 买卖 订单
+// 撮合 买卖 订单
 // stock_code: 股票代码
 func (this *Handler)Match(stock_code string, price float64, count int) (err error) {
 	// 对操作加锁

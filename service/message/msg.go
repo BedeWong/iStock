@@ -10,6 +10,11 @@ type MsgRevokeOrder struct {
 	Req_time	string		`json:"req_time"`
 }
 
+const (
+	MsgSourceStockDealType_ADD = iota
+	MsgSourceStockDealType_Del
+)
+
 //  添加 stock code 到数据源 的处理
 type MsgSourceStockDeal struct {
 	ID   		uint			`json:"id"`
@@ -18,11 +23,6 @@ type MsgSourceStockDeal struct {
 	Stock_name	string			`json:"stock_name"`
 	Req_time	string			`json:"req_time"`
 }
-
-const (
-	MsgSourceStockDealType_ADD = iota
-	MsgSourceStockDealType_Del
-)
 
 // 逐笔成交 数据
 type MsgTickData struct {

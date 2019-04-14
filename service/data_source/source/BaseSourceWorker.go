@@ -31,7 +31,7 @@ func  NewBaseSourceWorker(fn_ context.CancelFunc, ctx_ context.Context, code_ st
 
 // 协程的执行主方法体，
 func (this *BaseSourceWorker) FetchWork(ch chan<- model.Tb_tick_data) (error) {
-	log.Debug("BaseSourceWorker:FetchWork starting.")
+	log.Debug("BaseSourceWorker:FetchWork starting. code: [%s]", this.code)
 	for {
 		tick := time.Tick(time.Second)
 		select {
