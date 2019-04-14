@@ -3,7 +3,7 @@ package data_source
 import (
 	"context"
 	"github.com/BedeWong/iStock/service/data_source/source"
-	"github.com/BedeWong/iStock/service/message"
+	"github.com/BedeWong/iStock/model"
 )
 
 // 逐筆成交記錄
@@ -21,14 +21,14 @@ type SourceHandler struct {
 	stocks Stocks
 
 	// 所有的 协程 往这里推送tick数据
-	ch chan message.MsgTickData
+	ch chan model.Tb_tick_data
 }
 
 // 暂时这样写好吧
 func NewSourceHandler() SourceHandler {
 	return SourceHandler{
 		stocks: make(map[string] source.ISourceWorker),
-		ch : make(chan message.MsgTickData),
+		ch : make(chan model.Tb_tick_data),
 	}
 }
 
@@ -57,7 +57,7 @@ func (this *SourceHandler)Remove(code string) {
 }
 
 //返回 channel
-func (this *SourceHandler)GetTickDataChan() (  chan message.MsgTickData) {
+func (this *SourceHandler)GetTickDataChan() (  chan model.Tb_tick_data) {
 	return this.ch
 }
 

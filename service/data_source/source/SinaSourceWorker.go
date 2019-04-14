@@ -4,7 +4,7 @@ import (
 	"time"
 	"context"
 	"github.com/gpmgo/gopm/modules/log"
-	"github.com/BedeWong/iStock/service/message"
+	"github.com/BedeWong/iStock/model"
 )
 
 type SinaSourceWorker struct {
@@ -20,7 +20,7 @@ func NewSinaSourceHandler(fn_ context.CancelFunc, ctx_ context.Context, code_ st
 	}
 }
 
-func(this *SinaSourceWorker) FetchWork(ch chan<- message.MsgTickData) (error){
+func(this *SinaSourceWorker) FetchWork(ch chan<- model.Tb_tick_data) (error){
 	for {
 		tick := time.Tick(time.Second)
 		select {
@@ -43,8 +43,8 @@ func(this *SinaSourceWorker) FetchWork(ch chan<- message.MsgTickData) (error){
 }
 
 
-func(this *SinaSourceWorker)FechOnce() (message.MsgTickData, error){
+func(this *SinaSourceWorker)FechOnce() (model.Tb_tick_data, error){
 
 
-	return message.MsgTickData{}, nil
+	return model.Tb_tick_data{}, nil
 }

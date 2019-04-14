@@ -4,6 +4,7 @@ import (
 	"github.com/gpmgo/gopm/modules/log"
 	"github.com/BedeWong/iStock/service/message"
 	manager "github.com/BedeWong/iStock/service"
+	"github.com/BedeWong/iStock/model"
 )
 
 // 與外界通信的 channel
@@ -22,6 +23,7 @@ func HandlerCmd(workers SourceHandler, item interface{}) {
 	default:
 		log.Error("recv a item type:%T, val:%#v, can not hander it.", item, item)
 	case message.MsgSourceStockDeal:		// add stock to source
+		log.Debug("source:HandlerCmd 收到一个股票代码 stock: %v", obj.Stock_code)
 		if obj.Type == message.MsgSourceStockDealType_ADD {
 			log.Info("recv add stock to source. %s", obj.Stock_code)
 			workers.Append(obj.Stock_code)
@@ -34,14 +36,14 @@ func HandlerCmd(workers SourceHandler, item interface{}) {
 
 // Source worker 数据收集
 // 收集的数据发送到 撮合 模块
-func HanderTickData(ch <-chan message.MsgTickData) {
+func HanderTickData(ch <-chan model.Tb_tick_data) {
 	for {
 		data, ok := <- ch
 		if ok == false {
 			log.Error("数据源被无情的关闭了,怎么肥四?")
 			break
 		}
-		log.Debug("recv a tick data: data: %v", data)
+		log.Debug("data_source:Handler:HandlerTickDara: recv a tick data: data: %v", data)
 
 		err := manager.Send2Match(data, 1)
 		if err != nil {
