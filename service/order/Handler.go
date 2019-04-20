@@ -43,9 +43,10 @@ func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_p
 	}else if order.Trade_type == model.TRADE_TYPE_SALE {
 		order.Trade_type_desc = "卖出"
 	}
-
+	// 持久化订单数据
 	db.DBSession.Save(&order)
 
+	// 保存订单实时信息
 	order_real := model.Tb_order_real{
 		Order_id : (int)(order.ID),
 		User_id : userid,
@@ -73,7 +74,7 @@ func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_p
 
 
 // 设置订单状态完成
-func SetOederStatusFinished(id uint) {
+func SetOederStatusFinished(id int) {
 	if id == 0 {
 		log.Error("SetOederStatusFinished err: id: %d", id)
 		return
@@ -94,7 +95,7 @@ func SetOederStatusFinished(id uint) {
 
 
 // 设置订单状态撤销
-func SetOederStatusRevoke(id uint) {
+func SetOederStatusRevoke(id int) {
 	if id == 0 {
 		log.Error("SetOederStatusFinished err: id: %d", id)
 		return

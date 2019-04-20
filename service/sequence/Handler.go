@@ -198,7 +198,7 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 
 	// 保存订单的 更新
 	db.DBSession.Save(&order_real)
-	// 撤单
+	// 大单撤单
 	order.SetOederStatusRevoke(order_real.ID)
 
 	return nil

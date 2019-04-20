@@ -35,14 +35,21 @@ func (this *Handler)CheckIdentity(uid, req_time_stamp, sign string) (bool, error
 }
 
 // 计算 总金额， 印花税， 過戶費， 交易佣金
-func (this *Handler)CalcTax(uid int, trade_type int, stock_code, stock_name string, stock_price float64, stock_count int)(float64, float64, float64, float64, error){
+func (this *Handler)CalcTax(
+	uid int,
+	trade_type int,
+	stock_code,
+	stock_name string,
+	stock_price float64,
+	stock_count int,
+	)(float64, float64, float64, float64, error){
 
 	var amount, stamp_tax, transfer_tax, brokerage float64
 
 	// 交易總金額
 	amount = utils.Decimal(stock_price*(float64(stock_count)), 2) // 保留兩位小數
 
-	// 賣出 需要 計算 印花稅
+	// 賣出 需要計算印花稅
 	//if trade_type == model.TRADE_TYPE_SALE {
 	//	stamp_tax = amount * conf.Data.Trade.StampTax
 	//	stamp_tax = utils.Decimal(stamp_tax, 2)
@@ -55,6 +62,9 @@ func (this *Handler)CalcTax(uid int, trade_type int, stock_code, stock_name stri
 		transfer_tax = amount * conf.Data.Trade.TransferFeeSZ
 	}
 	transfer_tax = utils.Decimal(transfer_tax, 2)
+	if transfer_tax < 1.0 {
+		transfer_tax = 1.0
+	}
 
 	// 佣金：
 	brokerage = amount * conf.Data.Trade.Brokerage
@@ -64,7 +74,8 @@ func (this *Handler)CalcTax(uid int, trade_type int, stock_code, stock_name stri
 	if trade_type == model.TRADE_TYPE_SALE {
 		amount = 0
 	}
-	log.Debug("CalcTax amout: %f, stamp_tax: %f, transfer_tax: %f, brokerage: %f",
+	log.Debug(
+		"CalcTax amout: %f, stamp_tax: %f, transfer_tax: %f, brokerage: %f",
 		amount, stamp_tax, transfer_tax, brokerage)
 	return amount, stamp_tax, transfer_tax, brokerage, nil
 }
@@ -72,22 +83,25 @@ func (this *Handler)CalcTax(uid int, trade_type int, stock_code, stock_name stri
 // 扣算 金額，
 // 印花税： 卖方出， 每笔交易体现  -- 不在这里计算  modified 2018年10月24日22:20:24  by BedeWong
 // 过户费：单次交易计算， 后续不在扣除， 撤单不在退回。
-// 总金额： 卖出0 卖出时，逐笔清算， 买入统一冻结
-func (this *Handler)CheckAccountMoney(userid int, amount, stamp_tax, transfer_tax, brokerage float64) (err error) {
+// 总金额： 卖出0 卖出时，逐笔结算； 买入时统一冻结
+func (this *Handler)DeductUserTax(userid int,
+	amount, stamp_tax, transfer_tax, brokerage float64) (err error) {
 	user := model.Tb_user_assets{}
 
-	found := db.DBSession.Where("user_id = ?", userid).First(&user).RecordNotFound()
+	found := db.DBSession.Where(
+		"user_id = ?", userid).First(&user).RecordNotFound()
 	if found == true {
 		err = errors.New(fmt.Sprintf("用户[%d]找不到.", userid))
 		log.Error("CheckAccountMoney:err:%s", err)
-		return
+		return err
 	}
 
 	user.User_money -= amount + transfer_tax + brokerage
 	if user.User_money <= 0 {
 		err = errors.New(fmt.Sprintf("用户[%d]的余额不足.", userid))
-		log.Info("CheckAccountMoney:err:%s, 當前可用資產：%f", err, user.User_money)
-		return
+		log.Info(
+			"CheckAccountMoney:err:%s, 當前可用資產：%f", err, user.User_money)
+		return err
 	}
 
 	db.DBSession.Save(&user)

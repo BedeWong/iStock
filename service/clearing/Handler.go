@@ -15,6 +15,7 @@ import (
 	"github.com/BedeWong/iStock/conf"
 
 	manager "github.com/BedeWong/iStock/service"
+	"github.com/BedeWong/iStock/service/order"
 )
 
 
@@ -60,7 +61,7 @@ func RevokeOrderHandler(order_real model.Tb_order_real) {
 
 	if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		// 买订单撤单：
-		//  冻结 金额， 佣金， 解冻
+		//  冻结的印花税， 佣金， 解冻
 
 		freeze_money := order_real.Stock_price * float64(order_real.Stock_count)
 		freeze_money = utils.Decimal(freeze_money, 2)  // 保留两位小数
@@ -72,6 +73,8 @@ func RevokeOrderHandler(order_real model.Tb_order_real) {
 	} else if order_real.Trade_type == model.TRADE_TYPE_SALE {
 
 	}
+
+	order.SetOederStatusRevoke(order_real.Order_id)
 }
 
 // 成功 清算处理
@@ -80,10 +83,12 @@ func FinishOrderHandler(order_real model.Tb_order_real) {
 
 	log.Warn("FinishOrderHandler order:%#v", order_real)
 
+	order.SetOederStatusFinished(order_real.Order_id)
 	if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		// 买单 完成
 	}else if order_real.Trade_type == model.TRADE_TYPE_SALE {
 		// 卖单 完成
+		// 扣除
 	}
 }
 
