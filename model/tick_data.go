@@ -1,10 +1,14 @@
 package model
 
-import "github.com/BedeWong/iStock/db"
+import (
+	"time"
+	"github.com/BedeWong/iStock/db"
+	"github.com/jinzhu/gorm"
+)
 
 type Tb_tick_data struct {
-	ID 		uint			`json:"id"`
-	Tick_time 	string		`json:"tick_time"`
+	gorm.Model
+	Tick_time 	time.Time	`json:"tick_time"`
 	Tick_code   string  	`json:"tick_code"`
 	Tick_count	int			`json:"tick_count"`
 	Tick_price  float64		`json:"tick_price"`
