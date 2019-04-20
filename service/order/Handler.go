@@ -70,3 +70,45 @@ func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_p
 
 	return order_real, nil
 }
+
+
+// 设置订单状态完成
+func SetOederStatusFinished(id uint) {
+	if id == 0 {
+		log.Error("SetOederStatusFinished err: id: %d", id)
+		return
+	}
+
+	var order = model.Tb_order{}
+	var cnt = 0
+	db.DBSession.Where("id=?", id).Find(&order).Count(&cnt)
+	if cnt == 0 {
+		log.Warn("id: %d not exists.", id)
+		return
+	}
+
+	order.Order_status = model.ORDER_STATUS_FINISH
+	db.DBSession.Save(order)
+	return
+}
+
+
+// 设置订单状态撤销
+func SetOederStatusRevoke(id uint) {
+	if id == 0 {
+		log.Error("SetOederStatusFinished err: id: %d", id)
+		return
+	}
+
+	var order = model.Tb_order{}
+	var cnt = 0
+	db.DBSession.Where("id=?", id).Find(&order).Count(&cnt)
+	if cnt == 0 {
+		log.Warn("id: %d not exists.", id)
+		return
+	}
+
+	order.Order_status = model.ORDER_STATUS_REVOKE
+	db.DBSession.Save(order)
+	return
+}
