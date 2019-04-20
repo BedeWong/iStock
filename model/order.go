@@ -42,7 +42,7 @@ type Tb_order struct {
 	Freeze_amount float64   `gorm:"default:0"`
 
 	// 交易类型：  0买入   1 卖出
-	Trade_type int			`grom:not null`
+	Trade_type int			`grom:"not null"`
 	// 交易类型： 文字描述； eg 买入， 卖出
 	Trade_type_desc string	`gorm:"type:varchar(32); not null"`
 
