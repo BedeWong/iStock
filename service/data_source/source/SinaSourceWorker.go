@@ -13,7 +13,7 @@ type SinaSourceWorker struct {
 
 // 创建对象
 func NewSinaSourceWorker(fn_ context.CancelFunc, ctx_ context.Context, code_ string, url string) SinaSourceWorker{
-	return SinaSourceWorker {
+	worker := SinaSourceWorker {
 		BaseSourceWorker: BaseSourceWorker{
 			cancel: fn_,
 			ctx: ctx_,
@@ -21,6 +21,9 @@ func NewSinaSourceWorker(fn_ context.CancelFunc, ctx_ context.Context, code_ str
 		},
 		BaseUrl : url,
 	}
+
+	worker.specific = &worker
+	return worker
 }
 
 

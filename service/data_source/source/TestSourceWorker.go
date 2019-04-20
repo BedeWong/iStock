@@ -25,9 +25,13 @@ type TestSourceWorker struct {
 
 // New TestSourceWorker 对象
 func  NewTestSourceWorker(fn_ context.CancelFunc, ctx_ context.Context, code_ string) TestSourceWorker {
-	return TestSourceWorker{
+	worker := TestSourceWorker{
 		BaseSourceWorker: NewBaseSourceWorker(fn_, ctx_, code_),
 	}
+	// wtf?
+	worker.specific = &worker
+
+	return worker
 }
 
 

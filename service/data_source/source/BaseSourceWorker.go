@@ -19,6 +19,7 @@ import (
 )
 
 type BaseSourceWorker struct {
+	specific ISourceWorker
 	// cancel 句柄
 	cancel context.CancelFunc
 	// ctx对象
@@ -73,6 +74,11 @@ func (this *BaseSourceWorker) FetchWork(ch chan<- []model.Tb_tick_data) (error) 
 //
 // 留給具體類實現.
 func (this *BaseSourceWorker)FechOnce() ([]model.Tb_tick_data, error){
+	if this.specific != nil {
+		return this.specific.FechOnce()
+	}
+
+	// error
 	panic(errors.New("BaseSourceWorker::FechOnce NotImplement."))
 }
 
