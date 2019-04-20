@@ -70,6 +70,8 @@ func (pq *PriorityQueue) Update(item *Item, value interface{}, price float64, pr
 // 删除一个元素，
 func (pq *PriorityQueue) Remove(cmp func(val interface{})bool) error{
 	for _, it := range *pq {
+		log.Debug("pd Remove: range item: %#v", it)
+
 		if cmp(it.value) {
 			pq.Update(it, it.value, price_min, time_stamp_min)  // 修改 优先级到 top1
 
