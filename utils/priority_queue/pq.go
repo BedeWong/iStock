@@ -99,5 +99,5 @@ func NewQueueNode(val interface{}, tmstamp int64, price float64) *Item{
 
 // create priority Queue
 func NewPQ() PriorityQueue {
-	return make(PriorityQueue, 32)
+	return make(PriorityQueue, 0)
 }
