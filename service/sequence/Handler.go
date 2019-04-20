@@ -55,13 +55,16 @@ func (this *SequenceService) AddOrder(order_real model.Tb_order_real) error{
 	this.orders[id] = order_real
 
 	// 将订单添加到 买卖盘 队列
-	item := pq.NewQueueNode(order_real, order_real.UpdatedAt.UnixNano(), order_real.Stock_price)
+	item := pq.NewQueueNode(order_real,
+		order_real.UpdatedAt.UnixNano(),
+		order_real.Stock_price)
 	if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		// 委托买单
 		log.Debug("委託買單處理：%#v", order_real)
-		que, ok := this.PlateBuy[order_real.Stock_code];
+		que, ok := this.PlateBuy[order_real.Stock_code]
 		if ok == false {
 			// 当前队列还未建立
+			log.Debug("当前股票代码：[%s]还未建立买入队列.", order_real.Stock_code)
 			this.PlateBuy[order_real.Stock_code] = pq.NewPQ()
 			que = this.PlateBuy[order_real.Stock_code]
 		}
@@ -78,6 +81,7 @@ func (this *SequenceService) AddOrder(order_real model.Tb_order_real) error{
 		que, ok := this.PlateSale[order_real.Stock_code];
 		if ok == false {
 			// 当前队列还未建立
+			log.Debug("当前股票代码：[%s]还未建立卖出队列.", order_real.Stock_code)
 			this.PlateSale[order_real.Stock_code] = pq.NewNPQ()
 			que = this.PlateSale[order_real.Stock_code];
 		}
@@ -147,6 +151,7 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 				log.Error(e.Error())
 				return false
 			}
+			log.Debug("DelOrder iterator Sale que item val: %#v", item)
 
 			if item.ID == id {
 				log.Info("finded this item: %#v", item)
@@ -176,6 +181,7 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 				log.Error(e.Error())
 				return false
 			}
+			log.Debug("DelOrder iterator Buy que item val: %#v", item)
 
 			if item.ID == id {
 				log.Info("finded this item: %#v", item)
@@ -261,8 +267,12 @@ func (this *SequenceService)matchHandlerSaleQue(
 				if order_real.Stock_count > 0 {
 					this.orders[order_real.ID] = order_real  //  更新 orders
 					// 入定序队列
-					sequence_task_chan := manager.GetInstance().Sequence_que
-					sequence_task_chan <- order_real
+					// (NOTE: bedewong) 起协程发送数据。
+					// 当前协程是处理Sequence_que管道的，不起协程写会导致本协程阻塞
+					go func() {
+						task_chan := manager.GetInstance().Sequence_que
+						task_chan <- order_real
+					}()
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
@@ -358,8 +368,13 @@ func (this *SequenceService)matchHandlerBuyQue(
 				//  本单交易都未能全部完成， 不会再有
 				if order_real.Stock_count > 0 {
 					this.orders[order_real.ID] = order_real  //  更新 orders
-					sequence_task_chan := manager.GetInstance().Sequence_que
-					sequence_task_chan <- order_real
+					// 入定序队列
+					// (NOTE: bedewong) 起协程发送数据。
+					// 当前协程是处理Sequence_que管道的，不起协程写会导致本协程阻塞
+					go func() {
+						task_chan := manager.GetInstance().Sequence_que
+						task_chan <- order_real
+					}()
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
