@@ -449,8 +449,8 @@ func loadOrders(){
 	var orders []model.Tb_order_real
 	var cnt int
 	db.DBSession.Where("order_status = ?",
-		model.ORDER_STATUS_TBD).Find(orders).Count(&cnt)
-	log.Debug("loaded cnt:%d pieces of data.", cnt)
+		model.ORDER_STATUS_TBD).Find(&orders).Count(&cnt)
+	log.Debug("sequence loadOrders loaded cnt:%d pieces of data.", cnt)
 
 	for idx, item := range orders {
 		log.Debug("oders[%d]: %v", idx, item)
