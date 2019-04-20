@@ -49,7 +49,7 @@ func NewBaseSourceWorker(fn_ context.CancelFunc, ctx_ context.Context, code_ str
 func (this *BaseSourceWorker) FetchWork(ch chan<- []model.Tb_tick_data) (error) {
 	log.Debug("BaseSourceWorker:FetchWork starting. code: [%s]", this.code)
 	for {
-		tick := time.Tick(time.Second)
+		tick := time.Tick(time.Second * 5)
 		select {
 		case <- this.ctx.Done():
 			// this coroutine over
