@@ -89,7 +89,7 @@ func SetOederStatusFinished(id int) {
 	}
 
 	order.Order_status = model.ORDER_STATUS_FINISH
-	db.DBSession.Save(order)
+	db.DBSession.Save(&order)
 	return
 }
 
@@ -110,6 +110,6 @@ func SetOederStatusRevoke(id int) {
 	}
 
 	order.Order_status = model.ORDER_STATUS_REVOKE
-	db.DBSession.Save(order)
+	db.DBSession.Save(&order)
 	return
 }
