@@ -165,9 +165,9 @@ func (this *OrderService)RevokeOrder(req RevokeOrderRequest,
 	}
 
 	msg := message.MsgRevokeOrder{
-		Order_id:req.Order_id,
-		User_id:req.User_id,
-		Req_time : req.Req_time,
+		Order_id: req.Order_id,
+		User_id: req.User_id,
+		Req_time: req.Req_time,
 	}
 
 	// 撤销订单 发送 到定序系统 从队列中删除委托订单
