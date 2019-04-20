@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-// 根据 官方文档改编的 优先队列：买盘队列
+// 根据 官方文档改编的 优先队列：
 // An Item is something we manage in a priority queue.
 type Item struct {
 	value    interface{} // The value of the item; business data.
