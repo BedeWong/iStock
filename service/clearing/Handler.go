@@ -67,7 +67,6 @@ func RevokeOrderHandler(order_real model.Tb_order_real) {
 		freeze_money = utils.Decimal(freeze_money, 2)  // 保留两位小数
 
 		user.User_money += freeze_money
-		user.User_all_capital += freeze_money
 
 		db.DBSession.Save(&user)
 	} else if order_real.Trade_type == model.TRADE_TYPE_SALE {
@@ -120,9 +119,7 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 			return
 		}
 
-		user.User_all_capital += trade_vol - detail.Stamp_tax
 		user.User_money += trade_vol - detail.Stamp_tax
-
 		db.DBSession.Save(&user)
 
 		/************* 3) 修改 用戶的持股 */

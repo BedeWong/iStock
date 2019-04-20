@@ -12,8 +12,8 @@ type Tb_user_assets struct {
 	User_id 		int 		`gorm:"not null; unique_index"`
 	// 用户的可用资金
 	User_money		float64     `gorm:"type:decimal(12,3)"`
-	//  用户的总资产：包括当前的市值
-	User_all_capital	float64 `gorm:"type:decimal(12,3)"`
+	//  用户的当前 市值
+	User_mv	float64 			`gorm:"type:decimal(12,3)"`
 }
 
 func init() {
