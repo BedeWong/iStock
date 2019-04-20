@@ -69,6 +69,7 @@ func (pq *PriorityQueue) Update(item *Item, value interface{}, price float64, pr
 
 // 删除一个元素，
 func (pq *PriorityQueue) Remove(cmp func(val interface{})bool) error{
+	log.Debug("pq Remove len(*pd): %d", len(*pq))
 	for _, it := range *pq {
 		log.Debug("pd Remove: range item: %#v", it)
 
