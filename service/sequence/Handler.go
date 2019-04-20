@@ -11,6 +11,7 @@ import (
 	"github.com/BedeWong/iStock/db"
 	"github.com/BedeWong/iStock/service/message"
 	manager "github.com/BedeWong/iStock/service"
+	"github.com/BedeWong/iStock/service/order"
 )
 
 
@@ -28,7 +29,7 @@ type SequenceService struct {
 }
 
 // 定序模块服务对象
-var sequence *SequenceService
+var sequenceService *SequenceService
 
 // 添加訂單
 func (this *SequenceService) AddOrder(order model.Tb_order_real) error{
@@ -105,14 +106,14 @@ func (this *SequenceService) AddOrder(order model.Tb_order_real) error{
 
 // 撤單
 //
-func (this *SequenceService)DelOrder(order message.MsgRevokeOrder) error{
+func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 	// 对操作加锁
 	this.Lock()
 	defer this.Unlock()
 
 	log.Debug("DelOrder 撤單操作.")
 
-	id := order.Order_id
+	id := orderMsg.Order_id
 	if id == 0 {
 		log.Error("訂單ID錯誤:id=0")
 		return errors.New("訂單ID錯誤:id=0")
@@ -197,6 +198,8 @@ func (this *SequenceService)DelOrder(order message.MsgRevokeOrder) error{
 
 	// 保存订单的 更新
 	db.DBSession.Save(&order_real)
+	// 撤单
+	order.SetOederStatusRevoke(order_real.ID)
 
 	return nil
 }
@@ -426,15 +429,34 @@ func Init() {
 	task_chan := manager.GetInstance().Sequence_que
 
 	// 初始化 模块实例
-	sequence = &SequenceService{
+	sequenceService = &SequenceService{
 		PlateBuy : make(map[string] pq.PriorityQueue),
 		PlateSale : make(map[string] pq.NPriorityQueue),
 		orders : make(map[uint]model.Tb_order_real),
 	}
 
+	// 加载订单数据.
+	loadOrders()
+
 	go handleCmd(task_chan)
 
 	log.Info("Sequence Init ok.")
+}
+
+
+// 从数据库加载订单数据.
+func loadOrders(){
+	var orders []model.Tb_order_real
+	var cnt int
+	db.DBSession.Where("order_status = ?",
+		model.ORDER_STATUS_TBD).Find(orders).Count(&cnt)
+	log.Debug("loaded cnt:%d pieces of data.", cnt)
+
+	for idx, item := range orders {
+		log.Debug("oders[%d]: %v", idx, item)
+
+		sequenceService.AddOrder(item)
+	}
 }
 
 
@@ -444,16 +466,16 @@ func handleCmd(task_chan chan interface{}) {
 		// 获取推送来的订单
 		task := <- task_chan
 
-		log.Info("sequence recv a new task:%T, %#v", task, task)
+		log.Info("sequenceService recv a new task:%T, %#v", task, task)
 
 		switch item := task.(type) {
 		default:
 			log.Error("recv a item type:%T, val:%#v, can not hander it.",
 				task, task)
 		case model.Tb_order_real:   		// 委托下单
-			sequence.AddOrder(item)
+			sequenceService.AddOrder(item)
 		case message.MsgRevokeOrder:		// 委托 撤单
-			sequence.DelOrder(item)
+			sequenceService.DelOrder(item)
 		case []model.Tb_tick_data:			// 逐笔成交数据，
 			handleTickData(item)
 		}
@@ -464,7 +486,7 @@ func handleCmd(task_chan chan interface{}) {
 // 处理tick成交数据
 func handleTickData(datas []model.Tb_tick_data) {
 	for idx, item := range datas {
-		log.Debug("sequence module: idx: %d, data: %v", idx, item)
-		sequence.Match(item.Tick_code, item.Tick_price, item.Tick_count)
+		log.Debug("sequenceService module: idx: %d, data: %v", idx, item)
+		sequenceService.Match(item.Tick_code, item.Tick_price, item.Tick_count)
 	}
 }
