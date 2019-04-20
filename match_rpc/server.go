@@ -13,17 +13,17 @@ import (
 )
 
 // 服务注册.
-func register_service() {
-	order := new(service.Order)
+func registerService() {
+	order := new(service.OrderService)
 
-	rpc.RegisterName("order", order)
+	rpc.RegisterName("orderService", order)
 
 	log.Info("register service ok.")
 }
 
 
-func rpc_server_start(addr string) error{
-	register_service()
+func rpcServerStart(addr string) error{
+	registerService()
 
 	http.HandleFunc(conf.Data.Rpc.Pattern, func(w http.ResponseWriter, r *http.Request) {
 		var conn io.ReadWriteCloser = struct {
@@ -43,7 +43,7 @@ func rpc_server_start(addr string) error{
 
 func init(){
 	go func() {
-		err := rpc_server_start(conf.Data.Rpc.Addr)
+		err := rpcServerStart(conf.Data.Rpc.Addr)
 		if err != nil {
 			log.Error("rpc server start err:", err)
 			os.Exit(-1)
