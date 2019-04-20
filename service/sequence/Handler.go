@@ -13,13 +13,10 @@ import (
 	manager "github.com/BedeWong/iStock/service"
 )
 
+
 // 为每支股票维护两个队列，
-// 入队：  添加了一个订单
-// 出队：  订单匹配订单， 订单清算， 订单清算未全部完成的 继续入队
-type Handler struct {
-
+type SequenceService struct {
 	sync.Mutex
-
 	// 没支股票对应一个 优先队列[买，卖]
 	PlateBuy map[string] pq.PriorityQueue
 	PlateSale map[string] pq.NPriorityQueue
@@ -30,55 +27,11 @@ type Handler struct {
 	orders map[uint] model.Tb_order_real
 }
 
-var OrderHandler *Handler
-
-var sequence_que chan interface{}
-////  返回这个 channel
-//func GetChan() (chan interface{}) {
-//	return sequence_que
-//}
-
-func Init() {
-	// 初始化 chan
-	sequence_que = manager.GetInstance().Sequence_que
-
-	// 初始化 模块实例
-	OrderHandler = &Handler{
-		PlateBuy : make(map[string] pq.PriorityQueue),
-		PlateSale : make(map[string] pq.NPriorityQueue),
-		orders : make(map[uint]model.Tb_order_real),
-	}
-
-	 go func() {
-	 	for {
-	 		// 获取推送来的订单
-	 		it := <- sequence_que
-
-	 		log.Info("sequence recv a new task:%T, %#v", it, it)
-
-			switch item := it.(type) {
-			default:
-				log.Error("recv a item type:%T, val:%#v, can not hander it.", it, it)
-			case model.Tb_order_real:   		// 委托下单
-				OrderHandler.AddOrder(item)
-			case message.MsgRevokeOrder:		// 委托 撤单
-				OrderHandler.DelOrder(item)
-			case message.MsgTickData:			// 逐笔成交数据，
-				OrderHandler.Match(item.Tick_code, item.Tick_price, item.Tick_count)
-			}
-		}
-	 }()
-
-	log.Info("Sequence Init ok.")
-}
-
-// 获取 实例
-func GetInstance ()*Handler {
-	return OrderHandler
-}
+// 定序模块服务对象
+var sequence *SequenceService
 
 // 添加訂單
-func (this *Handler) AddOrder(order model.Tb_order_real) error{
+func (this *SequenceService) AddOrder(order model.Tb_order_real) error{
 	// 对操作加锁
 	this.Lock()
 	defer this.Unlock()
@@ -149,9 +102,10 @@ func (this *Handler) AddOrder(order model.Tb_order_real) error{
 	return nil
 }
 
+
 // 撤單
 //
-func (this *Handler)DelOrder(order message.MsgRevokeOrder) error{
+func (this *SequenceService)DelOrder(order message.MsgRevokeOrder) error{
 	// 对操作加锁
 	this.Lock()
 	defer this.Unlock()
@@ -178,7 +132,8 @@ func (this *Handler)DelOrder(order message.MsgRevokeOrder) error{
 	if order_real.Trade_type == model.TRADE_TYPE_SALE {
 		que, ok := this.PlateSale[order_real.Stock_code]
 		if ok == false {
-			err := errors.New(fmt.Sprintf("%s stock queue not exist", order_real.Stock_code))
+			err := errors.New(fmt.Sprintf(
+				"%s stock queue not exist", order_real.Stock_code))
 			log.Error(err.Error())
 			return err
 		}
@@ -186,7 +141,8 @@ func (this *Handler)DelOrder(order message.MsgRevokeOrder) error{
 		err := que.Remove(func(val interface{}) bool {
 			item, ok := val.(model.Tb_order_real)
 			if ok == false {
-				e := errors.New(fmt.Sprintf("item is not a Tb_order_real object. %T", item))
+				e := errors.New(fmt.Sprintf(
+					"item is not a Tb_order_real object. %T", item))
 				log.Error(e.Error())
 				return false
 			}
@@ -205,7 +161,8 @@ func (this *Handler)DelOrder(order message.MsgRevokeOrder) error{
 	}else if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		que, ok := this.PlateBuy[order_real.Stock_code]
 		if ok == false {
-			err := errors.New(fmt.Sprintf("%s stock queue not exist", order_real.Stock_code))
+			err := errors.New(fmt.Sprintf(
+				"%s stock queue not exist", order_real.Stock_code))
 			log.Error(err.Error())
 			return err
 		}
@@ -213,7 +170,8 @@ func (this *Handler)DelOrder(order message.MsgRevokeOrder) error{
 		err := que.Remove(func(val interface{}) bool {
 			item, ok := val.(model.Tb_order_real)
 			if ok == false {
-				e := errors.New(fmt.Sprintf("item is not a Tb_order_real object. %T", item))
+				e := errors.New(fmt.Sprintf(
+					"item is not a Tb_order_real object. %T", item))
 				log.Error(e.Error())
 				return false
 			}
@@ -243,20 +201,11 @@ func (this *Handler)DelOrder(order message.MsgRevokeOrder) error{
 	return nil
 }
 
-//// 本方法用于鉴定 订单是否是已经
-//func (this *Handler)checkOrderIsRevoke(order_real model.Tb_order_real) bool{
-//	return order_real.Order_status == model.ORDER_STATUS_REVOKE
-//}
-//
-//// 撤单的 订单处理
-//func (this *Handler)RevokeOrderHandler() error{
-//
-//	return nil
-//}
 
 // 处理 卖队列 订单
 //
-func (this *Handler)matchHandlerSaleQue(que pq.NPriorityQueue, price float64, count int) error {
+func (this *SequenceService)matchHandlerSaleQue(
+	que pq.NPriorityQueue, price float64, count int) error {
 	for {
 		if len(que) == 0 {
 			break
@@ -266,10 +215,12 @@ func (this *Handler)matchHandlerSaleQue(que pq.NPriorityQueue, price float64, co
 		ele := que.Pop()
 		it, b := ele.(*pq.Item)
 		if b == false {
-			log.Error("que.Pop() item not a *pq.Item object: %T, %v", ele, ele)
+			log.Error("que.Pop() item not a *pq.Item object: %T, %v",
+				ele, ele)
 			continue
 		}
 
+		// 取出用户的订单.
 		order_real, b := it.Value().(model.Tb_order_real)
 		if b {
 			if price >= order_real.Stock_price {
@@ -303,20 +254,23 @@ func (this *Handler)matchHandlerSaleQue(que pq.NPriorityQueue, price float64, co
 				// 将交易明细 发送到 清算系统（clearing）
 				manager.Send2Clearing(trade_detail, 2)
 
-				//  本档 为全部完成， 继续入队。
-				//  本档交易都未能全部完成， 不会再有
+				//  本单未全部完成， 继续入队。
 				if order_real.Stock_count > 0 {
 					this.orders[order_real.ID] = order_real  //  更新 orders
-					sequence_que <- order_real
+					// 入定序队列
+					sequence_task_chan := manager.GetInstance().Sequence_que
+					sequence_task_chan <- order_real
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
 						log.Error("json.Marshal(order_real) err:%v", err)
 					}else {
-						log.Info("sequence_que <- order_real: %s", string(msg_tmp))
+						log.Info("sequence_que <- order_real: %s",
+							string(msg_tmp))
 					}
 				}else {
-					// 本次的订单需要从 orders 中移除
+					// 改用户的这笔订单已经全部完成.
+					// 完成的订单需要从 orders 中移除
 					delete(this.orders, order_real.ID)
 				}
 
@@ -326,22 +280,30 @@ func (this *Handler)matchHandlerSaleQue(que pq.NPriorityQueue, price float64, co
 				}
 			} else if price < order_real.Stock_price {
 				// 成交价 比委托价低， 不成交
-				log.Info("sale que当前成交价：%f, 盘口价：%f", price, order_real.Stock_price)
+				log.Info("sale que当前成交价：%.2f, 盘口价：%.2f",
+					price, order_real.Stock_price)
 
 				// 后面也不会有 符合条件的订单了， 直接退出
 				break
 			}
 		} else {
-			log.Error("sale que item not handler: %T, %v", it.Value(), it.Value())
-			return errors.New(fmt.Sprintf("sale que item not handler: %T, %v", it.Value(), it.Value()))
+			log.Error("sale que item not handler: %T, %v",
+				it.Value(), it.Value())
+			return errors.New(
+				fmt.Sprintf("sale que item not handler: %T, %v",
+					it.Value(), it.Value()))
 		}
 	}
+
+	log.Debug("撮合卖队列订单完成")
 	return nil
 }
 
+
 // 处理 买盘队列
 //
-func (this *Handler)matchHandlerBuyQue(que pq.PriorityQueue, price float64, count int) error {
+func (this *SequenceService)matchHandlerBuyQue(
+	que pq.PriorityQueue, price float64, count int) error {
 	for {
 		if len(que) == 0 {
 			break
@@ -351,7 +313,8 @@ func (this *Handler)matchHandlerBuyQue(que pq.PriorityQueue, price float64, coun
 		ele := que.Pop()
 		it, b := ele.(*pq.Item)
 		if b == false {
-			log.Error("que.Pop() item not a *pq.Item object: %T, %v", ele, ele)
+			log.Error("que.Pop() item not a *pq.Item object: %T, %v",
+				ele, ele)
 			continue
 		}
 
@@ -388,20 +351,23 @@ func (this *Handler)matchHandlerBuyQue(que pq.PriorityQueue, price float64, coun
 				// 将交易明细 发送到 清算系统（clearing）
 				manager.Send2Clearing(trade_detail, 2)
 
-				//  本档 为全部完成， 继续入队。
-				//  本档交易都未能全部完成， 不会再有
+				//  本单未全部完成， 继续入队。
+				//  本单交易都未能全部完成， 不会再有
 				if order_real.Stock_count > 0 {
 					this.orders[order_real.ID] = order_real  //  更新 orders
-					sequence_que <- order_real
+					sequence_task_chan := manager.GetInstance().Sequence_que
+					sequence_task_chan <- order_real
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
 						log.Error("json.Marshal(order_real) err:%v", err)
 					}else {
-						log.Info("sequence_que <- order_real: %s", string(msg_tmp))
+						log.Info("sequence_que <- order_real: %s",
+							string(msg_tmp))
 					}
 				}else {
-					// 本次的订单需要从 orders 中移除
+					// 用户的本笔订单已经完成.
+					// 本次的订单需要从 orders 中移除.
 					delete(this.orders, order_real.ID)
 				}
 
@@ -410,22 +376,27 @@ func (this *Handler)matchHandlerBuyQue(que pq.PriorityQueue, price float64, coun
 					break
 				}
 			}else {
-				log.Info("BuyQue当前成交价：%f, 盘口价：%f", price, order_real.Stock_price)
+				log.Info("BuyQue当前成交价：%f, 盘口价：%f",
+					price, order_real.Stock_price)
 
 				// 后面也不会有 符合条件的订单了， 直接退出
 				break
 			}
 		}else {
-			log.Error("buy que item not handler: %T, %v", it.Value(), it.Value())
-			return errors.New(fmt.Sprintf("buy que item not handler: %T, %v", it.Value(), it.Value()))
+			log.Error("buy que item not handler: %T, %v",
+				it.Value(), it.Value())
+			return errors.New(fmt.Sprintf("buy que item not handler: %T, %v",
+				it.Value(), it.Value()))
 		}
 	}
 	return nil
 }
 
+
 // 撮合 买卖 订单
 // stock_code: 股票代码
-func (this *Handler)Match(stock_code string, price float64, count int) (err error) {
+func (this *SequenceService)Match(
+	stock_code string, price float64, count int) (err error) {
 	// 对操作加锁
 	this.Lock()
 	defer this.Unlock()
@@ -447,4 +418,53 @@ func (this *Handler)Match(stock_code string, price float64, count int) (err erro
 	}
 
 	return nil
+}
+
+
+func Init() {
+	// 初始化 chan
+	task_chan := manager.GetInstance().Sequence_que
+
+	// 初始化 模块实例
+	sequence = &SequenceService{
+		PlateBuy : make(map[string] pq.PriorityQueue),
+		PlateSale : make(map[string] pq.NPriorityQueue),
+		orders : make(map[uint]model.Tb_order_real),
+	}
+
+	go handleCmd(task_chan)
+
+	log.Info("Sequence Init ok.")
+}
+
+
+// sequence 模块，命令处理总入口
+func handleCmd(task_chan chan interface{}) {
+	for {
+		// 获取推送来的订单
+		task := <- task_chan
+
+		log.Info("sequence recv a new task:%T, %#v", task, task)
+
+		switch item := task.(type) {
+		default:
+			log.Error("recv a item type:%T, val:%#v, can not hander it.",
+				task, task)
+		case model.Tb_order_real:   		// 委托下单
+			sequence.AddOrder(item)
+		case message.MsgRevokeOrder:		// 委托 撤单
+			sequence.DelOrder(item)
+		case []model.Tb_tick_data:			// 逐笔成交数据，
+			handleTickData(item)
+		}
+	}
+}
+
+
+// 处理tick成交数据
+func handleTickData(datas []model.Tb_tick_data) {
+	for idx, item := range datas {
+		log.Debug("sequence module: idx: %d, data: %v", idx, item)
+		sequence.Match(item.Tick_code, item.Tick_price, item.Tick_count)
+	}
 }

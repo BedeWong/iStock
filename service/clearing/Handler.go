@@ -1,3 +1,10 @@
+// 清算模块，處理所有的 訂單的結算
+//
+// @author: bedewong
+// @create at:
+// @update at: 2019年4月20日
+// @change log:
+
 package clearing
 
 import (
@@ -10,18 +17,8 @@ import (
 	manager "github.com/BedeWong/iStock/service"
 )
 
-// 清算系統
-// 處理所有的 訂單的結算
 
-// 與外界通信的 channel
-//var clearing_que chan interface{}
-//
-//func GetChan() (chan interface{}){
-//	return clearing_que
-//}
-
-
-func Handler(task interface{}) error{
+func handleCmd(task interface{}) error{
 	switch item := task.(type) {
 	default:
 		log.Info("task type can not handler: %T, %#v", task, task)
@@ -157,7 +154,8 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 		}
 
 		// 3) 修改持倉價格
-		user_stocks.Stock_price = (user_stocks.Stock_price * (float64)(user_stocks.Stock_count) +
+		user_stocks.Stock_price =
+			(user_stocks.Stock_price * (float64)(user_stocks.Stock_count) +
 			detail.Stock_price * (float64)(detail.Stock_count)) /
 			(float64)(user_stocks.Stock_count + detail.Stock_count)
 		// 取兩位小數
@@ -175,14 +173,14 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 
 // 初始化函數
 func Init() {
-	clearing_que := manager.GetInstance().Clear_que
+	task_chan := manager.GetInstance().Clear_que
 
 	go func() {
 		for {
-			task := <-clearing_que
+			task := <-task_chan
 			log.Info("recv a new task: %T, %#v", task, task)
 
-			Handler(task)
+			handleCmd(task)
 		}
 	}()
 

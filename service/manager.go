@@ -30,22 +30,6 @@ func GetInstance() *Manager{
 	return manager
 }
 
-// 懒汉单例模式
-//var once sync.Once
-//func GetInstance() *Manager {
-//	once.Do(func() {
-//		manager = &Manager {
-//			make(chan interface{}),
-//			make(chan interface{}),
-//			make(chan interface{}),
-//			make(chan interface{}),
-//		}
-//	})
-//
-//	return manager
-//}
-
-//func (this *Manager)sendMsg(val interface{}, )
 
 // 发送一个msg到定序系统
 // msg : 消息
@@ -62,7 +46,7 @@ func Send2Senquence(msg interface{}, tmout int) error{
 	}
 }
 
-// 发送一个消息到 撮合系统
+// 发送一个消息到 撮合模塊
 // msg : 消息
 // tmout : 超时时间
 func Send2Match(msg interface{}, tmout int) error{
@@ -106,11 +90,3 @@ func Send2Source(msg interface{}, tmout int) error{
 		return errors.New("time out.")
 	}
 }
-
-//func Init() {
-//	//  初始化各個系統
-//	sequence.Init()
-//	clearing.Init()
-//	match.Init()
-//	data_source.Init()
-//}
