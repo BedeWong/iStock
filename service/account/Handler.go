@@ -105,6 +105,6 @@ func (this *Handler)DeductUserTax(userid int,
 	}
 
 	db.DBSession.Save(&user)
-	log.Debug("CheckAccountMoney user: %v", user)
+	log.Debug("CheckAccountMoney user: %#v", user)
 	return nil
 }

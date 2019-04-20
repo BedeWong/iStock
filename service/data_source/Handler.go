@@ -18,7 +18,7 @@ func HandlerCmd(workers SourceHandler, item interface{}) {
 	default:
 		log.Error("recv a item type:%T, val:%#v, can not hander it.", item, item)
 	case message.MsgSourceStockDeal:
-		log.Debug("source:HandlerCmd 收到一个股票代码 stock: %v", obj.Stock_code)
+		log.Debug("source:HandlerCmd 收到一个股票代码 stock: %#v", obj.Stock_code)
 		if obj.Type == message.MsgSourceStockDealType_ADD {
 			// add stock to source
 			log.Info("recv add stock to source. %s", obj.Stock_code)
@@ -44,7 +44,7 @@ func HanderTickData(ch <-chan []model.Tb_tick_data) {
 			log.Error("数据源被无情的关闭了,怎么肥四?")
 			break
 		}
-		log.Debug("data_source:Handler:HandlerTickDara: recv a tick data: data: %v", data)
+		log.Debug("data_source:Handler:HandlerTickDara: recv a tick data: data: %#v", data)
 
 		err := manager.Send2Match(data, 1)
 		if err != nil {

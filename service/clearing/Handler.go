@@ -169,7 +169,7 @@ func OrderDetailHandler(detail model.Tb_trade_detail) {
 		// 修改持倉股數
 		user_stocks.Stock_count += detail.Stock_count
 
-		log.Info("OrderDetailHandler user_stocks: %v", user_stocks)
+		log.Info("OrderDetailHandler user_stocks: %#v", user_stocks)
 		// 存入數據庫
 		db.DBSession.Save(&user_stocks)
 	}

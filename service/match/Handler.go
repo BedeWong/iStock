@@ -23,7 +23,7 @@ func Handler(task interface{}){
 	default:
 		log.Error("recv a item type:%T, val:%#v, can not hander it.", task, task)
 	case []model.Tb_tick_data:
-		log.Debug("recv a Tb_tick_data list, send to senquence module. data: %v",
+		log.Debug("recv a Tb_tick_data list, send to senquence module. data: %#v",
 			task)
 		// 直接转发到 定序模块进行 匹配
 		manager.Send2Senquence(item, 1)

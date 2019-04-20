@@ -46,7 +46,7 @@ func (this *TestSourceWorker)FechOnce() ([]model.Tb_tick_data, error){
 	db.DBSession.Where("tick_code = ?", this.code).
 		Order("tick_price, tick_time").  // 價格，時間升序
 		Find(&tick_datas).Count(&cnt)
-	log.Debug("BaseSource:FechOnce: fetch data: %v", tick_datas)
+	log.Debug("BaseSource:FechOnce: fetch data: %#v", tick_datas)
 
 	// 数据时效性：本次获取到的数据不会在下次的查询中出现.
 	//

@@ -66,7 +66,7 @@ func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_p
 		order_real.Trade_type_desc = "卖出"
 	}
 
-	log.Info("order_new order_detail: %v", order_real)
+	log.Info("order_new order_detail: %#v", order_real)
 	db.DBSession.Save(&order_real)
 
 	return order_real, nil

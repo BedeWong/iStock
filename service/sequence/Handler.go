@@ -32,14 +32,14 @@ type SequenceService struct {
 var sequenceService *SequenceService
 
 // 添加訂單
-func (this *SequenceService) AddOrder(order model.Tb_order_real) error{
+func (this *SequenceService) AddOrder(order_real model.Tb_order_real) error{
 	// 对操作加锁
 	this.Lock()
 	defer this.Unlock()
 
 	log.Debug("AddOrder starting.")
 
-	id := order.ID
+	id := order_real.ID
 	if id == 0 {
 		log.Error("訂單ID錯誤:id=0")
 		return errors.New("訂單ID錯誤:id=0")
@@ -52,40 +52,40 @@ func (this *SequenceService) AddOrder(order model.Tb_order_real) error{
 	}
 
 	// 添加[修改]订单
-	this.orders[id] = order
+	this.orders[id] = order_real
 
 	// 将订单添加到 买卖盘 队列
-	item := pq.NewQueueNode(order, order.UpdatedAt.UnixNano(), order.Stock_price)
-	if order.Trade_type == model.TRADE_TYPE_BUY {
+	item := pq.NewQueueNode(order_real, order_real.UpdatedAt.UnixNano(), order_real.Stock_price)
+	if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		// 委托买单
-		log.Debug("委託買單處理：%v", order)
-		que, ok := this.PlateBuy[order.Stock_code];
+		log.Debug("委託買單處理：%#v", order_real)
+		que, ok := this.PlateBuy[order_real.Stock_code];
 		if ok == false {
 			// 当前队列还未建立
-			this.PlateBuy[order.Stock_code] = pq.NewPQ()
-			que = this.PlateBuy[order.Stock_code]
+			this.PlateBuy[order_real.Stock_code] = pq.NewPQ()
+			que = this.PlateBuy[order_real.Stock_code]
 		}
 		que.Push(item)
 
-		order_string, err := json.Marshal(order)
+		order_string, err := json.Marshal(order_real)
 		if err != nil {
-			log.Error("json.Marshal(order) err:%v", err)
+			log.Error("json.Marshal(order) err:%#v", err)
 		}else {
 			log.Info("添加order[%s]成功. len=%d", string(order_string), que.Len())
 		}
-	}else if order.Trade_type == model.TRADE_TYPE_SALE {
+	}else if order_real.Trade_type == model.TRADE_TYPE_SALE {
 		// 委托卖单
-		que, ok := this.PlateSale[order.Stock_code];
+		que, ok := this.PlateSale[order_real.Stock_code];
 		if ok == false {
 			// 当前队列还未建立
-			this.PlateSale[order.Stock_code] = pq.NewNPQ()
-			que = this.PlateSale[order.Stock_code];
+			this.PlateSale[order_real.Stock_code] = pq.NewNPQ()
+			que = this.PlateSale[order_real.Stock_code];
 		}
 		que.Push(item)
 
-		order_string, err := json.Marshal(order)
+		order_string, err := json.Marshal(order_real)
 		if err != nil {
-			log.Error("json.Marshal(order) err:%v", err)
+			log.Error("json.Marshal(order) err:%#v", err)
 		}else {
 			log.Info("添加order[%s]成功. len=%d", string(order_string), que.Len())
 		}
@@ -94,11 +94,11 @@ func (this *SequenceService) AddOrder(order model.Tb_order_real) error{
 	// 通知source有新的股票代码，刷新成交数据
 	source_que := manager.GetInstance().Source_data_que
 	var msg = message.MsgSourceStockDeal{
-		Stock_code: order.Stock_code,
-		Stock_name: order.Stock_name,
+		Stock_code: order_real.Stock_code,
+		Stock_name: order_real.Stock_name,
 		Type: message.MsgSourceStockDealType_ADD,
 	}
-	msg.Stock_code = order.Stock_code
+	msg.Stock_code = order_real.Stock_code
 	source_que <- msg
 	return nil
 }
@@ -149,7 +149,7 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 			}
 
 			if item.ID == id {
-				log.Info("finded this item: %v", item)
+				log.Info("finded this item: %#v", item)
 				return true
 			}
 
@@ -178,7 +178,7 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 			}
 
 			if item.ID == id {
-				log.Info("finded this item: %v", item)
+				log.Info("finded this item: %#v", item)
 				return true
 			}
 
@@ -218,7 +218,7 @@ func (this *SequenceService)matchHandlerSaleQue(
 		ele := que.Pop()
 		it, b := ele.(*pq.Item)
 		if b == false {
-			log.Error("que.Pop() item not a *pq.Item object: %T, %v",
+			log.Error("que.Pop() item not a *pq.Item object: %T, %#v",
 				ele, ele)
 			continue
 		}
@@ -266,7 +266,7 @@ func (this *SequenceService)matchHandlerSaleQue(
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
-						log.Error("json.Marshal(order_real) err:%v", err)
+						log.Error("json.Marshal(order_real) err:%#v", err)
 					}else {
 						log.Info("sequence_que <- order_real: %s",
 							string(msg_tmp))
@@ -290,10 +290,10 @@ func (this *SequenceService)matchHandlerSaleQue(
 				break
 			}
 		} else {
-			log.Error("sale que item not handler: %T, %v",
+			log.Error("sale que item not handler: %T, %#v",
 				it.Value(), it.Value())
 			return errors.New(
-				fmt.Sprintf("sale que item not handler: %T, %v",
+				fmt.Sprintf("sale que item not handler: %T, %#v",
 					it.Value(), it.Value()))
 		}
 	}
@@ -316,7 +316,7 @@ func (this *SequenceService)matchHandlerBuyQue(
 		ele := que.Pop()
 		it, b := ele.(*pq.Item)
 		if b == false {
-			log.Error("que.Pop() item not a *pq.Item object: %T, %v",
+			log.Error("que.Pop() item not a *pq.Item object: %T, %#v",
 				ele, ele)
 			continue
 		}
@@ -363,7 +363,7 @@ func (this *SequenceService)matchHandlerBuyQue(
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
-						log.Error("json.Marshal(order_real) err:%v", err)
+						log.Error("json.Marshal(order_real) err:%#v", err)
 					}else {
 						log.Info("sequence_que <- order_real: %s",
 							string(msg_tmp))
@@ -386,9 +386,9 @@ func (this *SequenceService)matchHandlerBuyQue(
 				break
 			}
 		}else {
-			log.Error("buy que item not handler: %T, %v",
+			log.Error("buy que item not handler: %T, %#v",
 				it.Value(), it.Value())
-			return errors.New(fmt.Sprintf("buy que item not handler: %T, %v",
+			return errors.New(fmt.Sprintf("buy que item not handler: %T, %#v",
 				it.Value(), it.Value()))
 		}
 	}
@@ -408,7 +408,7 @@ func (this *SequenceService)Match(
 	if ok {
 		err = this.matchHandlerSaleQue(que_sale, price, count)
 		if err != nil {
-			log.Error("matchHandlerSaleQue err:%v", err)
+			log.Error("matchHandlerSaleQue err:%#v", err)
 		}
 	}
 
@@ -416,7 +416,7 @@ func (this *SequenceService)Match(
 	if ok {
 		err = this.matchHandlerBuyQue(que_buy, price, count)
 		if err != nil {
-			log.Error("matchHandlerBuyQue err:%v", err)
+			log.Error("matchHandlerBuyQue err:%#v", err)
 		}
 	}
 
@@ -453,7 +453,7 @@ func loadOrders(){
 	log.Debug("sequence loadOrders loaded cnt:%d pieces of data.", cnt)
 
 	for idx, item := range orders {
-		log.Debug("oders[%d]: %v", idx, item)
+		log.Debug("oders[%d]: %#v", idx, item)
 
 		sequenceService.AddOrder(item)
 	}
@@ -486,7 +486,7 @@ func handleCmd(task_chan chan interface{}) {
 // 处理tick成交数据
 func handleTickData(datas []model.Tb_tick_data) {
 	for idx, item := range datas {
-		log.Debug("sequenceService module: idx: %d, data: %v", idx, item)
+		log.Debug("sequenceService module: idx: %d, data: %#v", idx, item)
 		sequenceService.Match(item.Tick_code, item.Tick_price, item.Tick_count)
 	}
 }

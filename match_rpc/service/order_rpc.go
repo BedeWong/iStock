@@ -40,7 +40,7 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 		err := recover()
 			if err != nil {
 				resp.Ret_code = -1
-				resp.Err_msg = fmt.Sprintf("AddOrder err:%v", err)
+				resp.Err_msg = fmt.Sprintf("AddOrder err:%#v", err)
 			}
 	}()
 
@@ -51,7 +51,7 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 		req.Sign)
 	if err != nil {
 		resp.Ret_code = -1
-		resp.Err_msg = fmt.Sprintf("AddOrder err:%v", err)
+		resp.Err_msg = fmt.Sprintf("AddOrder err:%#v", err)
 		return err
 	}
 
@@ -144,7 +144,7 @@ func (this *OrderService)RevokeOrder(req RevokeOrderRequest,
 		err := recover()
 		if err != nil {
 			resp.Ret_code = -1
-			resp.Err_msg = fmt.Sprintf("RevokeOrder err:%v", err)
+			resp.Err_msg = fmt.Sprintf("RevokeOrder err:%#v", err)
 		}
 	}()
 
@@ -155,7 +155,7 @@ func (this *OrderService)RevokeOrder(req RevokeOrderRequest,
 								req.Sign)
 	if err != nil {
 		resp.Ret_code = -1
-		resp.Err_msg = fmt.Sprintf("RevokeOrder err:%v", err)
+		resp.Err_msg = fmt.Sprintf("RevokeOrder err:%#v", err)
 		return nil
 	}
 	if ok != true {
