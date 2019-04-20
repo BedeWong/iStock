@@ -20,7 +20,7 @@ type SequenceService struct {
 	sync.Mutex
 	// 没支股票对应一个 优先队列[买，卖]
 	PlateBuy map[string] pq.PriorityQueue
-	PlateSale map[string] pq.NPriorityQueue
+	PlateSale map[string] pq.RPriorityQueue
 
 	//  登记 所有的在队列里等待的订单， 未成交的可以撤单， 成交的从此队列删除
 	// key: order.ID
@@ -55,9 +55,6 @@ func (this *SequenceService) AddOrder(order_real model.Tb_order_real) error{
 	this.orders[id] = order_real
 
 	// 将订单添加到 买卖盘 队列
-	item := pq.NewQueueNode(order_real,
-		order_real.UpdatedAt.UnixNano(),
-		order_real.Stock_price)
 	if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		// 委托买单
 		log.Debug("委託買單處理：%#v", order_real)
@@ -65,10 +62,12 @@ func (this *SequenceService) AddOrder(order_real model.Tb_order_real) error{
 		if ok == false {
 			// 当前队列还未建立
 			log.Debug("当前股票代码：[%s]还未建立买入队列.", order_real.Stock_code)
-			this.PlateBuy[order_real.Stock_code] = pq.NewPQ()
+			this.PlateBuy[order_real.Stock_code] = pq.NewPriorityQueue()
 			que = this.PlateBuy[order_real.Stock_code]
 		}
-		que.Push(item)
+		que.Insert(order_real,
+			order_real.UpdatedAt.UnixNano(),
+			order_real.Stock_price)
 
 		order_string, err := json.Marshal(order_real)
 		if err != nil {
@@ -82,10 +81,12 @@ func (this *SequenceService) AddOrder(order_real model.Tb_order_real) error{
 		if ok == false {
 			// 当前队列还未建立
 			log.Debug("当前股票代码：[%s]还未建立卖出队列.", order_real.Stock_code)
-			this.PlateSale[order_real.Stock_code] = pq.NewNPQ()
+			this.PlateSale[order_real.Stock_code] = pq.NewRPriorityQueue()
 			que = this.PlateSale[order_real.Stock_code];
 		}
-		que.Push(item)
+		que.Insert(order_real,
+			order_real.UpdatedAt.UnixNano(),
+			order_real.Stock_price)
 
 		order_string, err := json.Marshal(order_real)
 		if err != nil {
@@ -143,23 +144,7 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 			return err
 		}
 
-		err := que.Remove(func(val interface{}) bool {
-			item, ok := val.(model.Tb_order_real)
-			if ok == false {
-				e := errors.New(fmt.Sprintf(
-					"item is not a Tb_order_real object. %T", item))
-				log.Error(e.Error())
-				return false
-			}
-			log.Debug("DelOrder iterator Sale que item val: %#v", item)
-
-			if item.ID == id {
-				log.Info("finded this item: %#v", item)
-				return true
-			}
-
-			return false
-		})
+		_, err := que.Remove(order_real)
 		if err != nil {
 			log.Error(err.Error())
 			return err
@@ -173,23 +158,7 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 			return err
 		}
 
-		err := que.Remove(func(val interface{}) bool {
-			item, ok := val.(model.Tb_order_real)
-			if ok == false {
-				e := errors.New(fmt.Sprintf(
-					"item is not a Tb_order_real object. %T", item))
-				log.Error(e.Error())
-				return false
-			}
-			log.Debug("DelOrder iterator Buy que item val: %#v", item)
-
-			if item.ID == id {
-				log.Info("finded this item: %#v", item)
-				return true
-			}
-
-			return false
-		})
+		_, err := que.Remove(order_real)
 		if err != nil {
 			log.Error(err.Error())
 			return err
@@ -214,23 +183,21 @@ func (this *SequenceService)DelOrder(orderMsg message.MsgRevokeOrder) error{
 // 处理 卖队列 订单
 //
 func (this *SequenceService)matchHandlerSaleQue(
-	que pq.NPriorityQueue, price float64, count int) error {
+	que pq.RPriorityQueue, price float64, count int) error {
 	for {
-		if len(que) == 0 {
+		if que.Len()== 0 {
 			break
 		}
 
 		// 取出order item
-		ele := que.Pop()
-		it, b := ele.(*pq.Item)
-		if b == false {
-			log.Error("que.Pop() item not a *pq.Item object: %T, %#v",
-				ele, ele)
+		item, err := que.Pop()
+		if err != nil {
+			log.Error("sequence matchHandlerSaleQue que.Pop() err: %#v", err)
 			continue
 		}
 
 		// 取出用户的订单.
-		order_real, b := it.Value().(model.Tb_order_real)
+		order_real, b := item.(model.Tb_order_real)
 		if b {
 			if price >= order_real.Stock_price {
 				// 成交价 >= 委托价： 模拟盘按 委托价 成交
@@ -301,10 +268,10 @@ func (this *SequenceService)matchHandlerSaleQue(
 			}
 		} else {
 			log.Error("sale que item not handler: %T, %#v",
-				it.Value(), it.Value())
+				item, item)
 			return errors.New(
 				fmt.Sprintf("sale que item not handler: %T, %#v",
-					it.Value(), it.Value()))
+					item, item))
 		}
 	}
 
@@ -318,20 +285,18 @@ func (this *SequenceService)matchHandlerSaleQue(
 func (this *SequenceService)matchHandlerBuyQue(
 	que pq.PriorityQueue, price float64, count int) error {
 	for {
-		if len(que) == 0 {
+		if que.Len() == 0 {
 			break
 		}
 
 		// 取出order item
-		ele := que.Pop()
-		it, b := ele.(*pq.Item)
-		if b == false {
-			log.Error("que.Pop() item not a *pq.Item object: %T, %#v",
-				ele, ele)
+		item, err := que.Pop()
+		if err != nil {
+			log.Error("sequence matchHandlerBuyQue que.Pop() err: %v", err)
 			continue
 		}
 
-		order_real, b := it.Value().(model.Tb_order_real)
+		order_real, b := item.(model.Tb_order_real)
 		if b {
 			if price <= order_real.Stock_price {
 				//  实盘成交价 要小于等于 模拟盘的 委托价
@@ -402,9 +367,9 @@ func (this *SequenceService)matchHandlerBuyQue(
 			}
 		}else {
 			log.Error("buy que item not handler: %T, %#v",
-				it.Value(), it.Value())
+				item, item)
 			return errors.New(fmt.Sprintf("buy que item not handler: %T, %#v",
-				it.Value(), it.Value()))
+				item, item))
 		}
 	}
 	return nil
@@ -446,7 +411,7 @@ func Init() {
 	// 初始化 模块实例
 	sequenceService = &SequenceService{
 		PlateBuy : make(map[string] pq.PriorityQueue),
-		PlateSale : make(map[string] pq.NPriorityQueue),
+		PlateSale : make(map[string] pq.RPriorityQueue),
 		orders : make(map[uint]model.Tb_order_real),
 	}
 
