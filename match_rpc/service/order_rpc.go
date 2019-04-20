@@ -78,7 +78,7 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 		amount, stamp_tax, transfer_tax, brokerage)
 
 	// 扣算 金额， 税费
-	err = acc.CheckAccountMoney(req.User_id,
+	err = acc.DeductUserTax(req.User_id,
 								amount,
 								stamp_tax,
 								transfer_tax,
@@ -108,7 +108,7 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 		return nil
 	}
 
-	// 将订单发送到 定序系统
+	// 将订单发送到 定序模块
 	manager.Send2Senquence(order_detail, 2)
 	// return ok
 	resp.Ret_code = 0
