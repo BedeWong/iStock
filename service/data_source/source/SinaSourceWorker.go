@@ -27,8 +27,8 @@ func NewSinaSourceWorker(fn_ context.CancelFunc, ctx_ context.Context, code_ str
 }
 
 
-func(this *SinaSourceWorker)FechOnce() (model.Tb_tick_data, error){
+func (this *SinaSourceWorker)FechOnce() ([]model.Tb_tick_data, error){
 
 
-	return model.Tb_tick_data{}, nil
+	return []model.Tb_tick_data{}, nil
 }
