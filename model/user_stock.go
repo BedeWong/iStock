@@ -48,4 +48,11 @@ func init() {
 	}else {
 		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Tb_user_position{})
 	}
+
+	if db.DBSession.HasTable(&Tb_user_contest_position{}) == false {
+		// will append "ENGINE=InnoDB" to the SQL statement when creating table `users`
+		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Tb_user_contest_position{})
+	}else {
+		db.DBSession.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&Tb_user_contest_position{})
+	}
 }
