@@ -235,12 +235,9 @@ func (this *SequenceService)matchHandlerSaleQue(
 				if order_real.Stock_count > 0 {
 					this.orders[order_real.ID] = order_real  //  更新 orders
 					// 入定序队列
-					// (NOTE: bedewong) 起协程发送数据。
-					// 当前协程是处理Sequence_que管道的，不起协程写会导致本协程阻塞
-					go func() {
-						task_chan := manager.GetInstance().Sequence_que
-						task_chan <- order_real
-					}()
+					que.Insert(order_real,
+						order_real.UpdatedAt.UnixNano(),
+						order_real.Stock_price)
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
@@ -336,12 +333,9 @@ func (this *SequenceService)matchHandlerBuyQue(
 				if order_real.Stock_count > 0 {
 					this.orders[order_real.ID] = order_real  //  更新 orders
 					// 入定序队列
-					// (NOTE: bedewong) 起协程发送数据。
-					// 当前协程是处理Sequence_que管道的，不起协程写会导致本协程阻塞
-					go func() {
-						task_chan := manager.GetInstance().Sequence_que
-						task_chan <- order_real
-					}()
+					que.Insert(order_real,
+						order_real.UpdatedAt.UnixNano(),
+						order_real.Stock_price)
 
 					msg_tmp, err := json.Marshal(order_real)
 					if err != nil {
