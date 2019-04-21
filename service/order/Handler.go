@@ -22,8 +22,18 @@ import (
 在数据库中将产生两个recode， Tb_order 存储的记录不会被更改
 	Tb_order_real 存储的记录会在每次的部分成交中修改其 数量，这个记录也是定序系统（sequence）中排序依据，存储依据。
  */
-func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_price float64, stock_count int,
-	amount, stamp_tax, transfer_tax, brokerage float64) (model.Tb_order_real, error) {
+func NewOrder(userid int,
+	trade_type int,  // 用户id
+	stock_code,  // 股票代码
+	stock_name string, // 股票名
+	stock_price float64, // 委托价
+	stock_count int,  // 委托量
+	contest_id int,  // 比赛场次：0 非比赛
+	amount,  // 总金额
+	stamp_tax, // 印花税
+	transfer_tax,  // 换手费
+	brokerage float64, // 佣金
+	) (model.Tb_order_real, error) {
 
 	order := model.Tb_order{
 		User_id : userid,
@@ -36,6 +46,7 @@ func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_p
 		Trade_type : trade_type,
 		Trade_type_desc: "",   // 待填写
 		Order_status : 0,
+		Contest_id: contest_id,
 	}
 	if order.Trade_type == model.TRADE_TYPE_BUY {
 		order.Trade_type_desc = "买入"
@@ -58,6 +69,7 @@ func NewOrder(userid int, trade_type int, stock_code, stock_name string, stock_p
 
 		Trade_type : trade_type,
 		Trade_type_desc: "",   // 待填写
+		Contest_id: contest_id, // 比赛id， 0表示非比赛
 	}
 	if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		order_real.Trade_type_desc = "买入"
@@ -84,7 +96,7 @@ func SetOederStatusFinished(id int) {
 	var cnt = 0
 	db.DBSession.Where("id=?", id).Find(&order).Count(&cnt)
 	if cnt == 0 {
-		log.Warn("id: %d not exists.", id)
+		log.Error("id: %d not exists.", id)
 		return
 	}
 
@@ -105,7 +117,7 @@ func SetOederStatusRevoke(id int) {
 	var cnt = 0
 	db.DBSession.Where("id=?", id).Find(&order).Count(&cnt)
 	if cnt == 0 {
-		log.Warn("id: %d not exists.", id)
+		log.Error("id: %d not exists.", id)
 		return
 	}
 

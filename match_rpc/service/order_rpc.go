@@ -23,6 +23,8 @@ type AddOrderRequest struct {
 	Stock_price	float64	`json:"stock_price"`
 	Trade_type	int		`json:"trade_type"`
 	Req_time	string  `json:"req_time"`
+	// 比赛id： 默认非比赛情况
+	Contest_id int          `json:"default:0"`
 }
 
 // 委托下单的响应
@@ -34,7 +36,7 @@ type AddOrderResponse struct {
 
 // 委托下单
 func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) error {
-	fmt.Println("req:", req)
+	log.Debug("req: %#v", req)
 
 	defer func(){
 		err := recover()
@@ -78,12 +80,22 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 		amount, stamp_tax, transfer_tax, brokerage)
 
 	// 扣算 金额， 税费
-	err = acc.DeductUserTax(req.User_id,
-								amount,
-								stamp_tax,
-								transfer_tax,
-								brokerage,
-								)
+	if req.Contest_id == 0 {
+		err = acc.DeductUserTax(req.User_id,
+			amount,
+			stamp_tax,
+			transfer_tax,
+			brokerage,
+		)
+	}else {
+		// 比赛的情况下.
+		err = acc.DeductUserContestTax(req.User_id,
+			amount,
+			stamp_tax,
+			transfer_tax,
+			brokerage,
+		)
+	}
 	if err != nil {
 		resp.Ret_code = -1
 		resp.Err_msg = err.Error()
@@ -97,6 +109,7 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 										req.Stock_name,
 										req.Stock_price,
 										req.Stock_count,
+										req.Contest_id,
 										amount,
 										stamp_tax,
 										transfer_tax,
@@ -127,6 +140,9 @@ type RevokeOrderRequest struct {
 	Stock_name	string	`json:"stock_name"`
 	Trade_type	int		`json:"trade_type"`
 	Req_time	string  `json:"req_time"`
+
+	// 比赛id： 默认非比赛情况
+	Contest_id int          `json:"default:0"`
 }
 
 // 委托撤单的响应

@@ -48,6 +48,9 @@ type Tb_order struct {
 
 	// 订单状态
 	Order_status int		`gorm:"default:0;"`
+
+	// 比赛id： 默认非比赛情况
+	Contest_id int          `gorm:"default:0"`
 }
 
 

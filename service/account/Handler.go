@@ -108,3 +108,30 @@ func (this *Handler)DeductUserTax(userid int,
 	log.Debug("CheckAccountMoney user: %#v", user)
 	return nil
 }
+
+
+// 扣算 金額: 比赛扣算规则.
+func (this *Handler)DeductUserContestTax(userid int,
+	amount, stamp_tax, transfer_tax, brokerage float64) (err error) {
+	user := model.Tb_user_assets{}
+
+	found := db.DBSession.Where(
+		"user_id = ?", userid).First(&user).RecordNotFound()
+	if found == true {
+		err = errors.New(fmt.Sprintf("用户[%d]找不到.", userid))
+		log.Error("CheckAccountMoney:err:%s", err)
+		return err
+	}
+
+	user.User_money -= amount + transfer_tax + brokerage
+	if user.User_money <= 0 {
+		err = errors.New(fmt.Sprintf("用户[%d]的余额不足.", userid))
+		log.Info(
+			"CheckAccountMoney:err:%s, 當前可用資產：%f", err, user.User_money)
+		return err
+	}
+
+	db.DBSession.Save(&user)
+	log.Debug("CheckAccountMoney user: %#v", user)
+	return nil
+}

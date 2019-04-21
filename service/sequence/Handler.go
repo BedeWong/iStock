@@ -208,6 +208,7 @@ func (this *SequenceService)matchHandlerSaleQue(
 					Stock_code : order_real.Stock_code,
 					Stock_price : order_real.Stock_price,   // 委托价 成交
 					Trade_type : order_real.Trade_type,
+					Contest_id: order_real.Contest_id,
 				}
 
 				if count <= order_real.Stock_count {
@@ -307,6 +308,7 @@ func (this *SequenceService)matchHandlerBuyQue(
 					Stock_code : order_real.Stock_code,
 					Stock_price : order_real.Stock_price,   // 委托价 成交
 					Trade_type : order_real.Trade_type,
+					Contest_id: order_real.Contest_id,
 				}
 
 				if count <= order_real.Stock_count {

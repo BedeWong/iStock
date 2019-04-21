@@ -19,6 +19,8 @@ type Tb_trade_detail struct {
 	Trade_type  int			`gorm:"default:0;"`
 
 	Stamp_tax	float64		`gorm:"type:decimal(12,2);default:0.0"`	 // 印花税
+	// 比赛id： 默认非比赛情况
+	Contest_id int          `gorm:"default:0"`
 }
 
 
