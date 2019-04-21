@@ -250,6 +250,9 @@ func (this *SequenceService)matchHandlerSaleQue(
 					// 改用户的这笔订单已经全部完成.
 					// 完成的订单需要从 orders 中移除
 					delete(this.orders, order_real.ID)
+
+					// 修改订单状态
+					manager.Send2Clearing(order_real, 2)
 				}
 
 				// 外盘的本笔交易 已经完成
@@ -348,6 +351,9 @@ func (this *SequenceService)matchHandlerBuyQue(
 					// 用户的本笔订单已经完成.
 					// 本次的订单需要从 orders 中移除.
 					delete(this.orders, order_real.ID)
+
+					// 修改订单状态
+					manager.Send2Clearing(order_real, 2)
 				}
 
 				// 外盘的本笔交易 已经完成
