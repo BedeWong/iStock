@@ -57,9 +57,9 @@ func (this *Handler)CalcTax(
 
 	// 過戶費:
 	if strings.ToLower(stock_code[:2]) == "sh" {
-		transfer_tax = amount * conf.Data.Trade.TransferFeeSH
+		transfer_tax = amount * conf.GetConfig().Trade.TransferFeeSH
 	}else if strings.ToLower(stock_code[:2]) == "sz" {
-		transfer_tax = amount * conf.Data.Trade.TransferFeeSZ
+		transfer_tax = amount * conf.GetConfig().Trade.TransferFeeSZ
 	}
 	transfer_tax = utils.Decimal(transfer_tax, 2)
 	if transfer_tax < 1.0 {
@@ -67,7 +67,7 @@ func (this *Handler)CalcTax(
 	}
 
 	// 佣金：
-	brokerage = amount * conf.Data.Trade.Brokerage
+	brokerage = amount * conf.GetConfig().Trade.Brokerage
 	brokerage = utils.Decimal(brokerage, 2)
 
 	// 总金额: 卖出不做计算

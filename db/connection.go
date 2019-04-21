@@ -17,8 +17,8 @@ var (
 
 func init() {
 	var err error
-	DBSession, err = gorm.Open("mysql", conf.Data.Mysql.Host + "/" +
-		conf.Data.Mysql.Database + "?charset=utf8&parseTime=true")
+	DBSession, err = gorm.Open("mysql", conf.GetConfig().Mysql.Host + "/" +
+		conf.GetConfig().Mysql.Database + "?charset=utf8&parseTime=true")
 	if err != nil {
 		log.Error("gorm init err:", err)
 		os.Exit(-1)
@@ -29,17 +29,17 @@ func init() {
 	DBSession.DB().SetConnMaxLifetime(time.Hour)
 
 	RedisClient = &redis.Pool{
-		MaxIdle : conf.Data.Rds.MaxIdle,
-		MaxActive: conf.Data.Rds.MaxActive,
+		MaxIdle : conf.GetConfig().Rds.MaxIdle,
+		MaxActive: conf.GetConfig().Rds.MaxActive,
 		IdleTimeout : 300*time.Second,
 		Dial : func() (redis.Conn, error){
-			c, err := redis.Dial("tcp", conf.Data.Rds.Host)
+			c, err := redis.Dial("tcp", conf.GetConfig().Rds.Host)
 			if err != nil {
 				return nil, err
 			}
 
-			c.Do("SELECT", conf.Data.Rds.DB)
-			c.Do("AUTH", conf.Data.Rds.Auth)
+			c.Do("SELECT", conf.GetConfig().Rds.DB)
+			c.Do("AUTH", conf.GetConfig().Rds.Auth)
 			return c, nil
 		},
 	}

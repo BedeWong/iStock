@@ -25,7 +25,7 @@ func registerService() {
 func rpcServerStart(addr string) error{
 	registerService()
 
-	http.HandleFunc(conf.Data.Rpc.Pattern, func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(conf.GetConfig().Rpc.Pattern, func(w http.ResponseWriter, r *http.Request) {
 		var conn io.ReadWriteCloser = struct {
 			io.Writer
 			io.ReadCloser
@@ -43,7 +43,7 @@ func rpcServerStart(addr string) error{
 
 func init(){
 	go func() {
-		err := rpcServerStart(conf.Data.Rpc.Addr)
+		err := rpcServerStart(conf.GetConfig().Rpc.Addr)
 		if err != nil {
 			log.Error("rpc server start err:", err)
 			os.Exit(-1)
