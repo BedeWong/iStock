@@ -19,7 +19,8 @@ const (
 
 // 交易类型
 const (
-	TRADE_TYPE_BUY = iota
+	TRADE_TYPE_NONE = iota
+	TRADE_TYPE_BUY
 	TRADE_TYPE_SALE
 )
 
