@@ -125,7 +125,7 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 	manager.Send2Senquence(order_detail, 2)
 	// return ok
 	resp.Ret_code = 0
-	resp.Err_msg = ""
+	resp.Err_msg = "操作成功"
 	return nil
 }
 
@@ -190,6 +190,6 @@ func (this *OrderService)RevokeOrder(req RevokeOrderRequest,
 	manager.Send2Senquence(msg, 2)
 	// return ok
 	resp.Ret_code = 0
-	resp.Err_msg = ""
+	resp.Err_msg = "操作成功"
 	return nil
 }
