@@ -13,6 +13,7 @@ import (
 	"github.com/BedeWong/iStock/service/sequence"
 	"github.com/BedeWong/iStock/service/clearing"
 	"github.com/gpmgo/gopm/modules/log"
+	"github.com/BedeWong/iStock/period"
 )
 
 func main(){
@@ -26,6 +27,9 @@ func main(){
 	match.Init()
 	sequence.Init()
 	clearing.Init()
+
+	// 周期任务
+	period.CornTask()
 
 	log.Info("main init ok.")
 	select{}

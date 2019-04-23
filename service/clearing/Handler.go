@@ -269,7 +269,7 @@ func saveUserContestPosition(detail *model.Tb_trade_detail) {
 			return
 		}
 		// 修改 持倉股數
-		user_stocks.Stock_count_can_sale -= detail.Stock_count
+		//user_stocks.Stock_count_can_sale -= detail.Stock_count
 		// 修改持倉成本價
 		// nothing
 	}else if detail.Trade_type == model.TRADE_TYPE_BUY {
@@ -309,7 +309,7 @@ func saveUserContestPosition(detail *model.Tb_trade_detail) {
 // 清算用户比赛的资产信息
 func saveUserContestAssets(detail *model.Tb_trade_detail) {
 	type assetsInfo struct {
-		c_money float64
+		C_money float64
 	}
 	var info = assetsInfo{}
 
@@ -327,14 +327,14 @@ func saveUserContestAssets(detail *model.Tb_trade_detail) {
 
 		trade_vol := detail.Stock_price * (float64)(detail.Stock_count)
 		trade_vol = utils.Decimal(trade_vol, 2)
-		info.c_money += trade_vol - detail.Stamp_tax
+		info.C_money += trade_vol - detail.Stamp_tax
 	}else if detail.Trade_type == model.TRADE_TYPE_BUY {
 
 	}
 
 	err := db.DBSession.Exec(
 		"update tb_contest_detail set c_money=? where u_id=? and c_id=? ",
-		info.c_money, detail.User_id, detail.Contest_id,
+		info.C_money, detail.User_id, detail.Contest_id,
 	).Error
 	if err != nil {
 		log.Error("saveUserContestAssets update failed user_id: %d, c_id: %d",
