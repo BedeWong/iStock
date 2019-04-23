@@ -121,6 +121,14 @@ func (this *OrderService)AddOrder(req AddOrderRequest, resp *AddOrderResponse) e
 		return nil
 	}
 
+	// 冻结用户资产
+	err = order.FreezeUserStock(order_detail)
+	if err != nil {
+		resp.Ret_code = -1
+		resp.Err_msg = err.Error()
+		return nil
+	}
+
 	// 将订单发送到 定序模块
 	manager.Send2Senquence(order_detail, 2)
 	// return ok

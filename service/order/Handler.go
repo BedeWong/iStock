@@ -4,6 +4,7 @@ import (
 	"github.com/BedeWong/iStock/model"
 	"github.com/BedeWong/iStock/db"
 	"github.com/gpmgo/gopm/modules/log"
+	"github.com/pkg/errors"
 )
 
 /***
@@ -124,4 +125,55 @@ func SetOederStatusRevoke(id int) {
 	order.Order_status = model.ORDER_STATUS_REVOKE
 	db.DBSession.Save(&order)
 	return
+}
+
+// 冻结用户持股
+//
+// order_real: 订单信息
+func FreezeUserStock(order_real model.Tb_order_real) error {
+	if order_real.Trade_type != model.TRADE_TYPE_BUY {
+		log.Debug("order Handler freezeUserStock 非买单不以处理.")
+		return nil
+	}
+
+	count := order_real.Stock_count
+	user_id := order_real.User_id
+	stock_code := order_real.Stock_code
+
+	if order_real.Contest_id > 0 {
+		pos := model.Tb_user_contest_position{}
+		// select 数据
+		err := db.DBSession.Where("user_id=? and stock_code=?",
+			user_id, stock_code).First(&pos).Error
+		if err != nil {
+			log.Error("order Handler freezeUserStock err:%v", err)
+			return errors.New("服务器开了个小差.")
+		}
+
+		if pos.Stock_count_can_sale < count {
+			log.Info("order Handler freezeUserStock 用户持股数不足：" +
+				"user_stock: %d, sale: %d", pos.Stock_count_can_sale, count)
+			return errors.New("没有足够的股数可供卖出.")
+		}
+		pos.Stock_count_can_sale -= count
+		db.DBSession.Save(&pos)
+	}else {
+		pos := model.Tb_user_position{}
+		// select 数据
+		err := db.DBSession.Where("user_id=? and stock_code=?",
+			user_id, stock_code).First(&pos).Error
+		if err != nil {
+			log.Error("order Handler freezeUserStock err:%v", err)
+			return errors.New("服务器开了个小差.")
+		}
+		if pos.Stock_count_can_sale < count {
+			log.Info("order Handler freezeUserStock 用户持股数不足：" +
+				"user_stock: %d, sale: %d", pos.Stock_count_can_sale, count)
+			return errors.New("没有足够的股数可供卖出.")
+		}
+		pos.Stock_count_can_sale -= count
+		db.DBSession.Save(&pos)
+	}
+
+	return nil
 }

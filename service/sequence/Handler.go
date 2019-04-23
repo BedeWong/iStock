@@ -31,7 +31,9 @@ type SequenceService struct {
 // 定序模块服务对象
 var sequenceService *SequenceService
 
-// 添加訂單
+// 添加訂單.
+//
+// 为订单中的股票创建买卖队列
 func (this *SequenceService) AddOrder(order_real model.Tb_order_real) error{
 	// 对操作加锁
 	this.Lock()

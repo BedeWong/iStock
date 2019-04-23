@@ -52,7 +52,6 @@ func OrderHandler(order_real model.Tb_order_real) {
 // 撤销普通委托单清算
 func RevokeGeneralOrder(order_real model.Tb_order_real) {
 	user := model.Tb_user_assets{}
-
 	err := db.DBSession.Where("user_id=?", order_real.User_id).First(&user).Error
 	if err != nil {
 		log.Error("user_id=%d 数据记录不存在.", order_real.User_id)
@@ -62,15 +61,29 @@ func RevokeGeneralOrder(order_real model.Tb_order_real) {
 	if order_real.Trade_type == model.TRADE_TYPE_BUY {
 		// 买订单撤单：
 		//  冻结的印花税， 佣金， 解冻
-
 		freeze_money := order_real.Stock_price * float64(order_real.Stock_count)
 		freeze_money = utils.Decimal(freeze_money, 2)  // 保留两位小数
 
 		user.User_money += freeze_money
-
 		db.DBSession.Save(&user)
+		// 用户资产一起更新
+		db.DBSession.Exec("update tb_user set u_money=?", user.User_money)
+		db.DBSession.Commit()
 	} else if order_real.Trade_type == model.TRADE_TYPE_SALE {
+		// 卖单撤单：
+		// 订单未卖出的持股数回退至用户的持股表
+		pos := model.Tb_user_position{}
+		err := db.DBSession.Where("user_id=? and stock_code=?",
+			order_real.User_id, order_real.Stock_code).First(&pos).Error
+		if err != nil {
+			log.Error("clearing Handler RevokeGeneralOrder: " +
+				"err: %v, order_real: %v", err, order_real)
+			return
+		}
 
+		// 未卖出的股退回账户持股表中
+		pos.Stock_count_can_sale += order_real.Stock_count
+		db.DBSession.Save(&pos)
 	}
 
 	order.SetOederStatusRevoke(order_real.Order_id)
@@ -91,6 +104,22 @@ func RevokeContestOrder(order_real model.Tb_order_real) {
 			"update tb_contest_detail set c_money=c_money+? where " +
 				"u_id=? and c_id=? and c_status=0",
 				freeze_money, user_id, contest_id)
+		db.DBSession.Commit()
+	}else {
+		// 卖单撤单：
+		// 订单未卖出的持股数回退至用户的持股表
+		pos := model.Tb_user_contest_position{}
+		err := db.DBSession.Where("user_id=? and stock_code=?",
+			order_real.User_id, order_real.Stock_code).First(&pos).Error
+		if err != nil {
+			log.Error("clearing Handler RevokeGeneralOrder: " +
+				"err: %v, order_real: %v", err, order_real)
+			return
+		}
+
+		// 未卖出的股退回账户持股表中
+		pos.Stock_count_can_sale += order_real.Stock_count
+		db.DBSession.Save(&pos)
 	}
 
 	order.SetOederStatusRevoke(order_real.Order_id)
@@ -156,7 +185,8 @@ func saveUserPosition(detail *model.Tb_trade_detail) {
 			return
 		}
 		// 修改 持倉股數
-		user_stocks.Stock_count_can_sale -= detail.Stock_count
+		// bedewong(note): 买入应该在订单中冻结股票
+		//user_stocks.Stock_count_can_sale -= detail.Stock_count
 		// 修改持倉成本價
 		// nothing
 	}else if detail.Trade_type == model.TRADE_TYPE_BUY {
